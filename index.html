@@ -278,7 +278,32 @@
             border-color: #4CAF50;
         }
 
-        /* 積木樣式 */
+        /* 積木樣式與色彩分級 (Color-Coded Cueing) */
+        .block-blue { background: #1976D2 !important; color: white; }   /* 主語/動詞：藍色 */
+        .block-yellow { background: #F57C00 !important; color: white; } /* 數量：橙黃色 */
+        .block-green { background: #388E3C !important; color: white; }  /* 名詞食材：綠色 */
+
+        /* 語法槽位容器 (Sentence Slot Frame) */
+        .slot-container {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .slot-box {
+            flex: 1;
+            max-width: 110px;
+            height: 42px;
+            border: 2px dashed #90A4AE;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            background: #fafafa;
+        }
+
         .m2-sentence-box {
             min-height: 50px;
             background: #f5f5f5;
@@ -314,7 +339,7 @@
         }
         .m2-word-block:active {
             transform: scale(0.95);
-            background: #1976D2;
+            opacity: 0.85;
         }
 
         /* 付款與高仿真港幣紙幣/硬幣樣式 */
@@ -1094,12 +1119,12 @@ function renderM2() {
         speakCantonese("早晨啊！去買餸啊？今晚煲咩湯呀？", enableDistractionBtn);
         setTimeout(enableDistractionBtn, 4500); // 防卡住機制
     }
-    // Step 2: 菜檔1 拼句
+    // Step 2: 菜檔1 拼句 (使用統一萬用核心句型 [我要] + [數量] + [食材])
     else if (m2Step === 2) {
-        speakCantonese("請跟伙記講你想買咩。");
-        var blocks = ['唔該', '兩', '個', '一', '斤', '棵', '薯仔', '三', '我要', '番茄'];
+        speakCantonese("請按順序點擊彩色積木，跟伙記講你想買咩。");
+        var blocks = ['唔該', '兩個', '一斤', '棵', '薯仔', '我要', '番茄'];
         var validAnswers = ['我要兩個番茄', '唔該我要兩個番茄', '我要兩個番茄唔該'];
-        renderSentenceStep("第一關：街市菜檔1 (表達)", blocks, validAnswers, "我要兩個番茄");
+        renderSentenceStep("第一關：街市菜檔1 (表達)", blocks, validAnswers, "我要兩個番茄", "番茄");
     } 
     // Step 3: 菜檔1 付款 ($12)
     else if (m2Step === 3) {
@@ -1153,12 +1178,12 @@ function renderM2() {
         speakCantonese("今日豆腐特價呀，要買趁快！", enableDistractionBtn2);
         setTimeout(enableDistractionBtn2, 4500); // 防卡住機制
     }
-    // Step 5: 菜檔2 拼句
+    // Step 5: 菜檔2 拼句 (使用統一萬用核心句型 [我要] + [數量] + [食材])
     else if (m2Step === 5) {
-        speakCantonese("請跟伙記講你想買咩。");
-        var blocks = ['唔該', '兩', '個', '一', '斤', '棵', '排', '三', '我要', '薯仔'];
+        speakCantonese("請按順序點擊彩色積木，跟伙記講你想買咩。");
+        var blocks = ['唔該', '兩個', '一斤', '棵', '排', '我要', '薯仔'];
         var validAnswers = ['我要兩個薯仔', '唔該我要兩個薯仔', '我要兩個薯仔唔該'];
-        renderSentenceStep("第二關：街市菜檔2 (表達)", blocks, validAnswers, "我要兩個薯仔");
+        renderSentenceStep("第二關：街市菜檔2 (表達)", blocks, validAnswers, "我要兩個薯仔", "薯仔");
     } 
     // Step 6: 菜檔2 付款 ($15)
     else if (m2Step === 6) {
@@ -1212,18 +1237,34 @@ function m2SelectSearchItem(isCorrect, name) {
     }
 }
 
-function renderSentenceStep(stepTitle, blocks, validAnswers, hintText) {
+/* 渲染包含顏色分級（Color-Coded Cueing）與固定槽位（Sentence Frame）的拼句介面 */
+function renderSentenceStep(stepTitle, blocks, validAnswers, hintText, targetItemName) {
     var container = document.getElementById('module2Content');
+    var targetLabel = targetItemName || "食材";
     
+    // 依據語法角色自動分配色彩 (Color-Coded Cueing)
     var blocksHtml = blocks.map(function(b) {
-        return `<button class="m2-word-block" onclick="m2AddBlock('${b}')">${b}</button>`;
+        var colorClass = "block-blue"; // 預設藍色：動詞/詞頭 (我要、唔該)
+        if (['兩', '個', '兩個', '一', '斤', '一斤', '棵', '排', '三', '三個'].indexOf(b) !== -1) {
+            colorClass = "block-yellow"; // 橙黃色：數量/量詞
+        } else if (['番茄', '薯仔', '豆腐', '白菜', '青瓜', '紅蘿蔔'].indexOf(b) !== -1) {
+            colorClass = "block-green"; // 綠色：目標食材名詞
+        }
+        return `<button class="m2-word-block ${colorClass}" onclick="m2AddBlock('${b}')">${b}</button>`;
     }).join('');
 
     container.innerHTML = `
         <div class="m2-badge">${stepTitle}</div>
-        <h3 style="margin:5px 0 10px;">🗣️ 請跟伙記講你想買咩：</h3>
+        <h3 style="margin:5px 0 10px; font-size: 17px;">🗣️ 請點擊下方彩色積木組句：</h3>
         
-        <div class="m2-sentence-box" id="m2SentenceBox">請點擊下方積木...</div>
+        <!-- 固定槽位視覺提示 (Slot Frame) -->
+        <div class="slot-container">
+            <div class="slot-box" style="border-color:#1976D2; color:#1976D2;">1. 動作 (我要)</div>
+            <div class="slot-box" style="border-color:#F57C00; color:#F57C00;">2. 數量 (兩個)</div>
+            <div class="slot-box" style="border-color:#388E3C; color:#388E3C;">3. 食材 (${targetLabel})</div>
+        </div>
+
+        <div class="m2-sentence-box" id="m2SentenceBox">請按順序點擊積木...</div>
 
         <div class="m2-blocks-grid">
             ${blocksHtml}
@@ -1256,7 +1297,7 @@ function m2AddBlock(word) {
 function m2ClearBlocks() {
     m2SelectedBlocks = [];
     var box = document.getElementById('m2SentenceBox');
-    box.innerText = "請點擊下方積木...";
+    box.innerText = "請按順序點擊積木...";
     document.getElementById('m2SentenceFeedback').innerText = "";
 }
 
