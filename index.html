@@ -410,7 +410,7 @@
                 </div>
             </button>
 
-            <button class="btn-back-menu" style="background-color: #009688;" onclick="openStatsModal()">📊 臨床紀錄</button>
+            <button class="btn-back-menu" style="background-color: #009688; width: 100%; margin-top: 10px; padding: 12px;" onclick="openStatsModal()">📊 臨床紀錄</button>
         </div>
     </div>
 
@@ -495,8 +495,27 @@
     </div>
 </div>
 
+<!-- 臨床數據統計彈出視窗 -->
+<div class="modal" id="statsModal">
+    <div class="modal-content" style="max-width: 400px;">
+        <h3 style="margin-top:0; color: #2c3e50; text-align: center;">📊 臨床練習數據記錄</h3>
+        
+        <div style="background: #f8f9fa; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 15px;">
+            <p style="margin: 6px 0;">🎯 <b>練習總題數：</b><span id="statTotal">0</span> 題</p>
+            <p style="margin: 6px 0;">✅ <b>整體正確率：</b><span id="statAccuracy" style="color: #2e7d32; font-weight: bold;">0%</span></p>
+            <p style="margin: 6px 0;">⏱️ <b>平均反應時間：</b><span id="statAvgTime" style="color: #0056b3; font-weight: bold;">0</span> 秒/題</p>
+            <p style="margin: 6px 0;">💡 <b>Cueing（提示）總次數：</b><span id="statHints" style="color: #d32f2f; font-weight: bold;">0</span> 次</p>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <button style="background-color: #f44336; color: white; flex: 1; font-size: 13px; padding: 8px;" onclick="resetStats()">🗑️ 重設數據</button>
+            <button style="background-color: #607D8B; color: white; flex: 1; font-size: 13px; padding: 8px;" onclick="closeStatsModal()">關閉</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    /* ==================== 臨床數據追蹤系統 ==================== */
+/* ==================== 臨床數據追蹤系統 ==================== */
 var clinicalData = {
     totalAttempted: 0,
     correctCount: 0,
@@ -505,17 +524,14 @@ var clinicalData = {
     questionStartTime: null
 };
 
-// 開始計時
 function startClinicalTimer() {
     clinicalData.questionStartTime = Date.now();
 }
 
-// 紀錄 Cueing (提示次數)
 function recordCueing() {
     clinicalData.hintCount++;
 }
 
-// 紀錄答對/完成
 function recordSuccess() {
     clinicalData.totalAttempted++;
     clinicalData.correctCount++;
@@ -523,11 +539,10 @@ function recordSuccess() {
     if (clinicalData.questionStartTime) {
         var elapsed = (Date.now() - clinicalData.questionStartTime) / 1000;
         clinicalData.totalReactionTimeSec += elapsed;
-        clinicalData.questionStartTime = null; // 避免重複累計
+        clinicalData.questionStartTime = null;
     }
 }
 
-// 開啟並更新數據視窗
 function openStatsModal() {
     var accuracy = clinicalData.totalAttempted > 0 
         ? Math.round((clinicalData.correctCount / clinicalData.totalAttempted) * 100) 
@@ -561,140 +576,140 @@ function resetStats() {
         openStatsModal();
     }
 }
-    /* 街市真實相片資源 */
+
+/* 街市真實相片資源 */
 var marketImg1 = 'market1.jpg';
 var marketImg2 = 'market2.jpg';
-    
-    /* 通用控制邏輯 */
-    function showMainMenu() {
-        document.getElementById('mainMenuView').style.display = 'block';
-        document.getElementById('module1View').style.display = 'none';
-        document.getElementById('module2View').style.display = 'none';
 
-        if (isListening && recognition) {
-            try { recognition.stop(); } catch(e){}
-        }
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-        }
+/* 通用控制邏輯 */
+function showMainMenu() {
+    document.getElementById('mainMenuView').style.display = 'block';
+    document.getElementById('module1View').style.display = 'none';
+    document.getElementById('module2View').style.display = 'none';
+
+    if (isListening && recognition) {
+        try { recognition.stop(); } catch(e){}
+    }
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+}
+
+function startModule1() {
+    document.getElementById('mainMenuView').style.display = 'none';
+    document.getElementById('module1View').style.display = 'block';
+    document.getElementById('module2View').style.display = 'none';
+
+    loadSavedQuestions();
+    filterQuestions();
+}
+
+function startModule2() {
+    document.getElementById('mainMenuView').style.display = 'none';
+    document.getElementById('module1View').style.display = 'none';
+    document.getElementById('module2View').style.display = 'block';
+
+    m2Step = 1;
+    renderM2();
+}
+
+function speakCantonese(text) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        var utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-HK';
+        utterance.rate = 0.85;
+        window.speechSynthesis.speak(utterance);
+    }
+}
+
+/* 模組一：原版核心邏輯 */
+var defaultQuestions = [
+    { name: "蘋果", category: "food", level: 1, keywords: ["蘋果", "屏果", "平果", "苹果", "個蘋果", "一個蘋果"], emoji: "🍎", semantic: "一種紅色嘅水果，甜甜地嘅", phonemic: "第一個字係『ping4』（平）..." },
+    { name: "香蕉", category: "food", level: 1, keywords: ["香蕉", "鄉蕉", "隻香蕉", "一隻香蕉"], emoji: "🍌", semantic: "黃色長條形嘅水果，剝皮食嘅", phonemic: "第一個字係『hoeng1』（香）..." },
+    { name: "西瓜", category: "food", level: 1, keywords: ["西瓜", "綠色西瓜", "個西瓜"], emoji: "🍉", semantic: "夏天成日食、綠色皮紅色肉嘅大水果", phonemic: "第一個字係『sai1』（西）..." },
+    { name: "珍珠奶茶", category: "food", level: 2, keywords: ["奶茶", "珍珠奶茶", "一杯奶茶"], emoji: "🧋", semantic: "台灣出名嘅飲品", phonemic: "第一個字係『naai5』（奶）..." },
+    { name: "牙刷", category: "daily", level: 1, keywords: ["牙刷", "芽刷", "雅刷", "牙刷仔", "一把牙刷", "一支牙刷"], emoji: "🪥", semantic: "每日屋企刷牙用嘅工具", phonemic: "第一個字係『ngaa4』（牙）..." },
+    { name: "眼鏡", category: "daily", level: 1, keywords: ["眼鏡", "眼精", "眼鏡兒", "一副眼鏡", "戴眼鏡"], emoji: "👓", semantic: "令我地睇嘢清楚啲嘢", phonemic: "第一個字係『ngaan5』（眼）..." },
+    { name: "手錶", category: "daily", level: 1, keywords: ["手錶", "手表", "隻手錶", "一隻手錶"], emoji: "⌚", semantic: "戴喺手腕睇時間嘅嘢", phonemic: "第一個字係『sau2』（手）..." },
+    { name: "雨傘", category: "daily", level: 2, keywords: ["雨傘", "遮", "一把遮", "雨遮", "一把雨傘"], emoji: "☂️", semantic: "落雨嗰陣用嚟遮雨嘅工具", phonemic: "第一個字係『jyu5』（雨）..." },
+    { name: "巴士", category: "transport", level: 1, keywords: ["巴士", "雙層巴士", "搭巴士", "公車"], emoji: "🚌", semantic: "馬路上載好多乘客嘅大型公共交通工具", phonemic: "第一個字係『baa1』（巴）..." },
+    { name: "計程車", category: "transport", level: 1, keywords: ["的士", "啲士", "搭的士", "紅的"], emoji: "🚕", semantic: "招手即停、按錶收費嘅汽車", phonemic: "第一個字係『dik1』（的）..." },
+    { name: "飛機", category: "transport", level: 2, keywords: ["飛機", "架飛機", "搭飛機"], emoji: "✈️", semantic: "喺天空飛、帶人去旅行嘅交通工具", phonemic: "第一個字係『fei1』（飛）..." },
+    { name: "眼睛", category: "body", level: 1, keywords: ["眼睛", "眼珠", "一雙眼睛", "隻眼"], emoji: "👁️", semantic: "面部用嚟睇嘢嘅器官", phonemic: "第一個字係『ngaan5』（眼）..." },
+    { name: "耳朵", category: "body", level: 1, keywords: ["耳朵", "耳仔", "隻耳仔"], emoji: "👂", semantic: "頭部兩旁用嚟聽聲音嘅器官", phonemic: "第一個字係『ji5』（耳）..." },
+    { name: "手掌", category: "body", level: 2, keywords: ["手掌", "隻手", "手板"], emoji: "✋", semantic: "用嚟拿嘢、握手嘅身體部位", phonemic: "第一個字係『sau2』（手）..." }
+];
+
+var rawQuestions = [];
+var activeQuestions = [];
+var currentIndex = 0;
+var recognition = null;
+var isListening = false;
+var hintLevel = 0;
+var hasAnswered = false;
+
+var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function loadSavedQuestions() {
+    var saved = localStorage.getItem('cantonese_rehab_custom_q');
+    var customList = saved ? JSON.parse(saved) : [];
+    rawQuestions = customList.concat(defaultQuestions);
+}
+
+function filterQuestions() {
+    var cat = document.getElementById('categorySelect').value;
+    var diff = document.getElementById('difficultySelect').value;
+
+    activeQuestions = rawQuestions.filter(function(q) {
+        var matchCat = (cat === 'all' || q.category === cat);
+        var matchDiff = (diff === 'all' || q.level.toString() === diff);
+        return matchCat && matchDiff;
+    });
+
+    if (activeQuestions.length === 0) activeQuestions = rawQuestions;
+    currentIndex = 0;
+    loadQuestion();
+    startClinicalTimer();
+}
+
+function loadQuestion() {
+    if (activeQuestions.length === 0) return;
+    var current = activeQuestions[currentIndex];
+
+    var imgEl = document.getElementById('displayImage');
+    var emojiEl = document.getElementById('displayEmoji');
+
+    if (current.image) {
+        imgEl.src = current.image;
+        imgEl.style.display = 'block';
+        emojiEl.style.display = 'none';
+    } else {
+        emojiEl.innerText = current.emoji || "❓";
+        emojiEl.style.display = 'flex';
+        imgEl.style.display = 'none';
     }
 
-    function startModule1() {
-        document.getElementById('mainMenuView').style.display = 'none';
-        document.getElementById('module1View').style.display = 'block';
-        document.getElementById('module2View').style.display = 'none';
+    document.getElementById('hintBox').innerText = "按「開始講嘢」講出名稱";
+    document.getElementById('heardBox').innerText = "聽到的聲音會顯示喺度...";
+    document.getElementById('statusText').innerText = "狀態：準備就緒 (廣東話模式)";
+    hintLevel = 0;
+    hasAnswered = false;
+}
 
-        loadSavedQuestions();
-        filterQuestions();
-    }
+function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
+function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
 
-    function startModule2() {
-        document.getElementById('mainMenuView').style.display = 'none';
-        document.getElementById('module1View').style.display = 'none';
-        document.getElementById('module2View').style.display = 'block';
-
-        m2Step = 1;
-        renderM2();
-    }
-
-    function speakCantonese(text) {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            var utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'zh-HK';
-            utterance.rate = 0.85;
-            window.speechSynthesis.speak(utterance);
-        }
-    }
-
-    /* 模組一：原版核心邏輯 */
-    var defaultQuestions = [
-        { name: "蘋果", category: "food", level: 1, keywords: ["蘋果", "屏果", "平果", "苹果", "個蘋果", "一個蘋果"], emoji: "🍎", semantic: "一種紅色嘅水果，甜甜地嘅", phonemic: "第一個字係『ping4』（平）..." },
-        { name: "香蕉", category: "food", level: 1, keywords: ["香蕉", "鄉蕉", "隻香蕉", "一隻香蕉"], emoji: "🍌", semantic: "黃色長條形嘅水果，剝皮食嘅", phonemic: "第一個字係『hoeng1』（香）..." },
-        { name: "西瓜", category: "food", level: 1, keywords: ["西瓜", "綠色西瓜", "個西瓜"], emoji: "🍉", semantic: "夏天成日食、綠色皮紅色肉嘅大水果", phonemic: "第一個字係『sai1』（西）..." },
-        { name: "珍珠奶茶", category: "food", level: 2, keywords: ["奶茶", "珍珠奶茶", "一杯奶茶"], emoji: "🧋", semantic: "台灣出名嘅飲品", phonemic: "第一個字係『naai5』（奶）..." },
-        { name: "牙刷", category: "daily", level: 1, keywords: ["牙刷", "芽刷", "雅刷", "牙刷仔", "一把牙刷", "一支牙刷"], emoji: "🪥", semantic: "每日屋企刷牙用嘅工具", phonemic: "第一個字係『ngaa4』（牙）..." },
-        { name: "眼鏡", category: "daily", level: 1, keywords: ["眼鏡", "眼精", "眼鏡兒", "一副眼鏡", "戴眼鏡"], emoji: "👓", semantic: "令我地睇嘢清楚啲嘢", phonemic: "第一個字係『ngaan5』（眼）..." },
-        { name: "手錶", category: "daily", level: 1, keywords: ["手錶", "手表", "隻手錶", "一隻手錶"], emoji: "⌚", semantic: "戴喺手腕睇時間嘅嘢", phonemic: "第一個字係『sau2』（手）..." },
-        { name: "雨傘", category: "daily", level: 2, keywords: ["雨傘", "遮", "一把遮", "雨遮", "一把雨傘"], emoji: "☂️", semantic: "落雨嗰陣用嚟遮雨嘅工具", phonemic: "第一個字係『jyu5』（雨）..." },
-        { name: "巴士", category: "transport", level: 1, keywords: ["巴士", "雙層巴士", "搭巴士", "公車"], emoji: "🚌", semantic: "馬路上載好多乘客嘅大型公共交通工具", phonemic: "第一個字係『baa1』（巴）..." },
-        { name: "計程車", category: "transport", level: 1, keywords: ["的士", "啲士", "搭的士", "紅的"], emoji: "🚕", semantic: "招手即停、按錶收費嘅汽車", phonemic: "第一個字係『dik1』（的）..." },
-        { name: "飛機", category: "transport", level: 2, keywords: ["飛機", "架飛機", "搭飛機"], emoji: "✈️", semantic: "喺天空飛、帶人去旅行嘅交通工具", phonemic: "第一個字係『fei1』（飛）..." },
-        { name: "眼睛", category: "body", level: 1, keywords: ["眼睛", "眼珠", "一雙眼睛", "隻眼"], emoji: "👁️", semantic: "面部用嚟睇嘢嘅器官", phonemic: "第一個字係『ngaan5』（眼）..." },
-        { name: "耳朵", category: "body", level: 1, keywords: ["耳朵", "耳仔", "隻耳仔"], emoji: "👂", semantic: "頭部兩旁用嚟聽聲音嘅器官", phonemic: "第一個字係『ji5』（耳）..." },
-        { name: "手掌", category: "body", level: 2, keywords: ["手掌", "隻手", "手板"], emoji: "✋", semantic: "用嚟拿嘢、握手嘅身體部位", phonemic: "第一個字係『sau2』（手）..." }
-    ];
-    
-    var rawQuestions = [];
-    var activeQuestions = [];
-    var currentIndex = 0;
-    var recognition = null;
-    var isListening = false;
-    var hintLevel = 0;
-    var hasAnswered = false;
-
-    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    function loadSavedQuestions() {
-        var saved = localStorage.getItem('cantonese_rehab_custom_q');
-        var customList = saved ? JSON.parse(saved) : [];
-        rawQuestions = customList.concat(defaultQuestions);
-    }
-
-    function filterQuestions() {
-        var cat = document.getElementById('categorySelect').value;
-        var diff = document.getElementById('difficultySelect').value;
-
-        activeQuestions = rawQuestions.filter(function(q) {
-            var matchCat = (cat === 'all' || q.category === cat);
-            var matchDiff = (diff === 'all' || q.level.toString() === diff);
-            return matchCat && matchDiff;
-        });
-
-        if (activeQuestions.length === 0) activeQuestions = rawQuestions;
-        currentIndex = 0;
-        loadQuestion();startClinicalTimer();
-    }
-
-    function loadQuestion() {
-        if (activeQuestions.length === 0) return;
-        var current = activeQuestions[currentIndex];
-
-        var imgEl = document.getElementById('displayImage');
-        var emojiEl = document.getElementById('displayEmoji');
-
-        if (current.image) {
-            imgEl.src = current.image;
-            imgEl.style.display = 'block';
-            emojiEl.style.display = 'none';
-        } else {
-            emojiEl.innerText = current.emoji || "❓";
-            emojiEl.style.display = 'flex';
-            imgEl.style.display = 'none';
-        }
-
-        document.getElementById('hintBox').innerText = "按「開始講嘢」講出名稱";
-        document.getElementById('heardBox').innerText = "聽到的聲音會顯示喺度...";
-        document.getElementById('statusText').innerText = "狀態：準備就緒 (廣東話模式)";
-        hintLevel = 0;
-        hasAnswered = false;
-    }
-
-    function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
-    function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
-
-    // 圖片壓縮核心函式 (縮放至最大 400px 並壓縮品質)
 function compressImage(file, callback) {
     var reader = new FileReader();
     reader.onload = function(e) {
         var img = new Image();
         img.onload = function() {
             var canvas = document.createElement('canvas');
-            var max_size = 400; // 照片邊長上限 (px)
+            var max_size = 400;
             var width = img.width;
             var height = img.height;
 
-            // 保持等比例縮放
             if (width > height) {
                 if (width > max_size) {
                     height *= max_size / width;
@@ -713,7 +728,6 @@ function compressImage(file, callback) {
             var ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            // 轉為 Base64 並壓縮至 70% 品質
             var compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
             callback(compressedDataUrl);
         };
@@ -722,7 +736,6 @@ function compressImage(file, callback) {
     reader.readAsDataURL(file);
 }
 
-// 儲存自訂題目 (整合圖片壓縮)
 function saveCustomQuestion() {
     var fileInput = document.getElementById('customImageInput');
     var nameInput = document.getElementById('customNameInput').value.trim();
@@ -737,7 +750,6 @@ function saveCustomQuestion() {
         return; 
     }
 
-    // 觸發壓縮並儲存
     compressImage(fileInput.files[0], function(compressedBase64) {
         var newQuestion = {
             name: nameInput,
@@ -770,394 +782,369 @@ function saveCustomQuestion() {
         fileInput.value = '';
     });
 }
-    function clearCustomQuestions() {
-        if (confirm("確定要刪除所有上傳過的照片題目嗎？")) {
-            localStorage.removeItem('cantonese_rehab_custom_q');
-            loadSavedQuestions();
-            document.getElementById('categorySelect').value = 'all';
-            filterQuestions();
+
+function clearCustomQuestions() {
+    if (confirm("確定要刪除所有上傳過的照片題目嗎？")) {
+        localStorage.removeItem('cantonese_rehab_custom_q');
+        loadSavedQuestions();
+        document.getElementById('categorySelect').value = 'all';
+        filterQuestions();
+    }
+}
+
+function initSpeechRecognition() {
+    if (!SpeechRecognition) {
+        document.getElementById('statusText').innerText = "⚠️ 瀏覽器不支援語音辨識（建議使用 Chrome/Safari）";
+        return;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = 'zh-HK';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    recognition.onstart = function() {
+        isListening = true;
+        hasAnswered = false;
+        document.getElementById('micBtn').classList.add('mic-active');
+        document.getElementById('micBtn').innerText = "🎙️ 聽緊你講嘢...";
+        document.getElementById('statusText').innerText = "請講出圖中物品嘅廣東話名稱";
+        document.getElementById('heardBox').innerText = "聽緊...";
+    };
+
+    recognition.onresult = function(event) {
+        var transcript = '';
+        for (var i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
         }
-    }
+        var cleanText = transcript.replace(/[.,!?。，！？\s]/g, '');
+        document.getElementById('heardBox').innerText = "聽到的內容：「" + cleanText + "」";
 
-    function initSpeechRecognition() {
-        if (!SpeechRecognition) {
-            document.getElementById('statusText').innerText = "⚠️ 瀏覽器不支援語音辨識（建議使用 Chrome/Safari）";
-            return;
+        if (!hasAnswered && cleanText.length > 0) checkAnswer(cleanText);
+    };
+
+    recognition.onerror = function(event) {
+        if (event.error !== 'no-speech') {
+            document.getElementById('statusText').innerText = "收音不清晰，家屬可按「講得啱」過關";
         }
+        stopListeningState();
+    };
 
-        recognition = new SpeechRecognition();
-        recognition.lang = 'zh-HK';
-        recognition.continuous = false;
-        recognition.interimResults = true;
+    recognition.onend = function() { stopListeningState(); };
+}
 
-        recognition.onstart = function() {
-            isListening = true;
-            hasAnswered = false;
-            document.getElementById('micBtn').classList.add('mic-active');
-            document.getElementById('micBtn').innerText = "🎙️ 聽緊你講嘢...";
-            document.getElementById('statusText').innerText = "請講出圖中物品嘅廣東話名稱";
-            document.getElementById('heardBox').innerText = "聽緊...";
-        };
-
-        recognition.onresult = function(event) {
-            var transcript = '';
-            for (var i = event.resultIndex; i < event.results.length; i++) {
-                transcript += event.results[i][0].transcript;
-            }
-            var cleanText = transcript.replace(/[.,!?。，！？\s]/g, '');
-            document.getElementById('heardBox').innerText = "聽到的內容：「" + cleanText + "」";
-
-            if (!hasAnswered && cleanText.length > 0) checkAnswer(cleanText);
-        };
-
-        recognition.onerror = function(event) {
-            if (event.error !== 'no-speech') {
-                document.getElementById('statusText').innerText = "收音不清晰，家屬可按「講得啱」過關";
-            }
-            stopListeningState();
-        };
-
-        recognition.onend = function() { stopListeningState(); };
+function stopListeningState() {
+    isListening = false;
+    var btn = document.getElementById('micBtn');
+    if (btn) {
+        btn.classList.remove('mic-active');
+        btn.innerText = "🎤 開始講嘢";
     }
+}
 
-    function stopListeningState() {
-        isListening = false;
-        var btn = document.getElementById('micBtn');
-        if (btn) {
-            btn.classList.remove('mic-active');
-            btn.innerText = "🎤 開始講嘢";
-        }
-    }
-
-    function toggleListening() {
-        if (!recognition) { alert("請使用 Chrome 或 Safari 瀏覽器。"); return; }
-        if (isListening) {
-            try { recognition.stop(); } catch(e) {}
-        } else {
-            try {
-                recognition.lang = 'zh-HK'; recognition.start();
-            } catch (e) {
-                try {
-                    recognition.stop();
-                    setTimeout(function() { recognition.lang = 'zh-HK'; recognition.start(); }, 200);
-                } catch(err) {}
-            }
-        }
-    }
-
-    function checkAnswer(userInput) {
-        if (!userInput) return;
-        var current = activeQuestions[currentIndex];
-        var isCorrect = current.keywords.some(function(key) { return userInput.indexOf(key) !== -1; });
-        if (isCorrect) handleSuccess("🎉 答對咗！好棒！");
-        recordSuccess();
-    }
-
-    function manualPass() { handleSuccess("👍 家屬確認答對！太棒了！"); }
-
-    function handleSuccess(msg) {
-        if (hasAnswered) return;
-        recordSuccess();
-        hasAnswered = true;
+function toggleListening() {
+    if (!recognition) { alert("請使用 Chrome 或 Safari 瀏覽器。"); return; }
+    if (isListening) {
         try { recognition.stop(); } catch(e) {}
-
-        var current = activeQuestions[currentIndex];
-        document.getElementById('hintBox').innerText = msg;
-        speakCantonese("答對咗，呢個係" + current.name);
-        setTimeout(function() { nextQuestion(); }, 2200);
-    }
-
-    function giveManualHint() {
-        if (activeQuestions.length === 0) return;
-        var current = activeQuestions[currentIndex];
-        hintLevel++;
-        if (hintLevel === 1) {
-            document.getElementById('hintBox').innerText = "提示：" + current.semantic;
-            speakCantonese(current.semantic);
-        } else if (hintLevel === 2) {
-            document.getElementById('hintBox').innerText = "發音提示：" + current.phonemic;
-            speakCantonese(current.phonemic);
-        } else {
-            document.getElementById('hintBox').innerText = "答案係：" + current.name;
-            speakCantonese("呢個就係" + current.name);
-        recordCueing();
+    } else {
+        try {
+            recognition.lang = 'zh-HK'; recognition.start();
+        } catch (e) {
+            try {
+                recognition.stop();
+                setTimeout(function() { recognition.lang = 'zh-HK'; recognition.start(); }, 200);
+            } catch(err) {}
         }
     }
+}
 
-    function nextQuestion() {
-        if (activeQuestions.length === 0) return;
-        currentIndex = (currentIndex + 1) % activeQuestions.length;
-        loadQuestion();startClinicalTimer();
+function checkAnswer(userInput) {
+    if (!userInput) return;
+    var current = activeQuestions[currentIndex];
+    var isCorrect = current.keywords.some(function(key) { return userInput.indexOf(key) !== -1; });
+    if (isCorrect) handleSuccess("🎉 答對咗！好棒！");
+}
+
+function manualPass() { handleSuccess("👍 家屬確認答對！太棒了！"); }
+
+function handleSuccess(msg) {
+    if (hasAnswered) return;
+    recordSuccess();
+    hasAnswered = true;
+    try { recognition.stop(); } catch(e) {}
+
+    var current = activeQuestions[currentIndex];
+    document.getElementById('hintBox').innerText = msg;
+    speakCantonese("答對咗，呢個係" + current.name);
+    setTimeout(function() { nextQuestion(); }, 2200);
+}
+
+function giveManualHint() {
+    if (activeQuestions.length === 0) return;
+    var current = activeQuestions[currentIndex];
+    hintLevel++;
+    recordCueing();
+    if (hintLevel === 1) {
+        document.getElementById('hintBox').innerText = "提示：" + current.semantic;
+        speakCantonese(current.semantic);
+    } else if (hintLevel === 2) {
+        document.getElementById('hintBox').innerText = "發音提示：" + current.phonemic;
+        speakCantonese(current.phonemic);
+    } else {
+        document.getElementById('hintBox').innerText = "答案係：" + current.name;
+        speakCantonese("呢個就係" + current.name);
+    }
+}
+
+function nextQuestion() {
+    if (activeQuestions.length === 0) return;
+    currentIndex = (currentIndex + 1) % activeQuestions.length;
+    loadQuestion();
+    startClinicalTimer();
+}
+
+/* =========================================================================
+   模組二：社區街市買餸實戰
+========================================================================= */
+var m2Step = 1; 
+var m2SelectedBlocks = [];
+var m2PaidAmount = 0;
+
+function renderM2() {
+    m2SelectedBlocks = [];
+    m2PaidAmount = 0;
+    var container = document.getElementById('module2Content');
+
+    if (m2Step === 1) {
+        speakCantonese("今晚想煲番茄薯仔湯，你要買兩個番茄同埋兩個薯仔。請喺第一間菜檔相片中，點擊揀出番茄。");
+        container.innerHTML = `
+            <div class="m2-badge">第一關：街市菜檔1 (1/3)</div>
+            <div class="m2-task-box">🍲 <b>任務：</b>今晚想煲<b>番茄薯仔湯</b>，你需要買<b>兩個番茄</b>同埋<b>兩個薯仔</b>。</div>
+            <h3 style="margin:8px 0;">請點擊相片中的「番茄」🍅</h3>
+            
+            <div class="photo-map-container">
+                <img src="market1.jpg" class="photo-map-img" alt="街市菜檔1">
+                <div class="hotspot" style="top: 10%; left: 15%; width: 35%; height: 35%;" onclick="m2SelectSearchItem(true, '番茄')"></div>
+                <div class="hotspot" style="top: 35%; left: 32%; width: 30%; height: 50%;" onclick="m2SelectSearchItem(false, '蘆筍')"></div>
+                <div class="hotspot" style="top: 50%; left: 62%; width: 35%; height: 40%;" onclick="m2SelectSearchItem(false, '紅蘿蔔')"></div>
+                <div class="hotspot" style="top: 0%; left: 52%; width: 45%; height: 30%;" onclick="m2SelectSearchItem(false, '小紅蘿蔔')"></div>
+            </div>
+
+            <div id="m2Feedback" class="hint-box">請直接點擊相片中的「番茄」</div>
+        `;
+    } 
+    else if (m2Step === 2) {
+        speakCantonese("請跟伙記講你想買咩。");
+        var blocks = ['唔該', '兩', '個', '一', '斤', '棵', '薯仔', '三', '我要', '番茄'];
+        var validAnswers = ['我要兩個番茄', '唔該我要兩個番茄', '我要兩個番茄唔該'];
+        renderSentenceStep("第一關：街市菜檔1 (2/3)", blocks, validAnswers, "我要兩個番茄");
+    } 
+    else if (m2Step === 3) {
+        speakCantonese("番茄，好！秤咗呢度12蚊。");
+        renderPaymentStep("第一關：街市菜檔1 (3/3)", 12, "番茄，好！秤咗呢度$12蚊。");
+    } 
+    else if (m2Step === 4) {
+        speakCantonese("接著嚟到第二間菜檔，請喺相片中點擊揀出薯仔。");
+        container.innerHTML = `
+            <div class="m2-badge">第二關：街市菜檔2 (1/3)</div>
+            <div class="m2-task-box">🍲 <b>任務：</b>買完番茄，依家要喺第二間菜檔買<b>兩個薯仔</b>。</div>
+            <h3 style="margin:8px 0;">請點擊相片中的「薯仔」🥔</h3>
+            
+            <div class="photo-map-container">
+                <img src="market2.jpg" class="photo-map-img" alt="街市菜檔2">
+                <div class="hotspot" style="top: 52%; left: 12%; width: 38%; height: 32%;" onclick="m2SelectSearchItem(true, '薯仔')"></div>
+                <div class="hotspot" style="top: 60%; left: 52%; width: 35%; height: 30%;" onclick="m2SelectSearchItem(false, '番茄')"></div>
+                <div class="hotspot" style="top: 15%; left: 0%; width: 45%; height: 40%;" onclick="m2SelectSearchItem(false, '白菜')"></div>
+                <div class="hotspot" style="top: 80%; left: 45%; width: 30%; height: 20%;" onclick="m2SelectSearchItem(false, '青瓜')"></div>
+            </div>
+
+            <div id="m2Feedback" class="hint-box">請直接點擊相片中的「薯仔」</div>
+        `;
+    } 
+    else if (m2Step === 5) {
+        speakCantonese("請跟伙記講你想買咩。");
+        var blocks = ['唔該', '兩', '個', '一', '斤', '棵', '排', '三', '我要', '薯仔'];
+        var validAnswers = ['我要兩個薯仔', '唔該我要兩個薯仔', '我要兩個薯仔唔該'];
+        renderSentenceStep("第二關：街市菜檔2 (2/3)", blocks, validAnswers, "我要兩個薯仔");
+    } 
+    else if (m2Step === 6) {
+        speakCantonese("兩個薯仔呢度15蚊。");
+        renderPaymentStep("第二關：街市菜檔2 (3/3)", 15, "兩個薯仔，秤咗呢度$15蚊。");
+    } 
+    else if (m2Step === 7) {
+        speakCantonese("恭喜你！成功買齊材料！今晚有美味嘅番茄薯仔湯飲啦！");
+        container.innerHTML = `
+            <div style="font-size: 60px; margin: 10px 0;">🥣</div>
+            <h2 style="color: #4CAF50; margin-top:0;">恭喜通關！煲湯成功！</h2>
+            <div class="m2-task-box" style="text-align: left; background:#eef7ff; border-color:#bbdefb; color:#1565c0;">
+                <b>🍲 番茄薯仔湯 材料結算：</b><br>
+                • 番茄 2個：<b>$12</b><br>
+                • 薯仔 2個：<b>$15</b><br>
+                -----------------------------<br>
+                <b>💰 總共付款：$27 港幣</b>
+            </div>
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn-primary" onclick="startModule2()">🔄 再玩一次買餸實戰</button>
+                <button class="btn-next" style="background-color:#607D8B;" onclick="showMainMenu()">🏠 返回主選單</button>
+            </div>
+        `;
     }
 
-
-    /* =========================================================================
-       模組二：社區街市買餸實戰 (煲番茄薯仔湯 + 真相照片 + 港幣視覺硬幣)
-    ========================================================================= */
-    var m2Step = 1; 
-    var m2SelectedBlocks = [];
-    var m2PaidAmount = 0;
-
-    function renderM2() {
-        m2SelectedBlocks = [];
-        m2PaidAmount = 0;
-        var container = document.getElementById('module2Content');
-
-        if (m2Step === 1) { // 關卡1-A: 街市菜檔尋詞 (真實相片點擊番茄)
-            speakCantonese("今晚想煲番茄薯仔湯，你要買兩個番茄同埋兩個薯仔。請喺第一間菜檔相片中，點擊揀出番茄。");
-            container.innerHTML = `
-                <div class="m2-badge">第一關：街市菜檔1 (1/3)</div>
-                <div class="m2-task-box">🍲 <b>任務：</b>今晚想煲<b>番茄薯仔湯</b>，你需要買<b>兩個番茄</b>同埋<b>兩個薯仔</b>。</div>
-                <h3 style="margin:8px 0;">請點擊相片中的「番茄」🍅</h3>
-                
-                <div class="photo-map-container">
-                    <img src="market1.jpg" class="photo-map-img" alt="街市菜檔1">
-                    <!-- 番茄熱區 (左上方堆疊處) -->
-                    <div class="hotspot" style="top: 10%; left: 15%; width: 35%; height: 35%;" onclick="m2SelectSearchItem(true, '番茄')"></div>
-                    <!-- 其他干擾熱區 -->
-                    <div class="hotspot" style="top: 35%; left: 32%; width: 30%; height: 50%;" onclick="m2SelectSearchItem(false, '蘆筍')"></div>
-                    <div class="hotspot" style="top: 50%; left: 62%; width: 35%; height: 40%;" onclick="m2SelectSearchItem(false, '紅蘿蔔')"></div>
-                    <div class="hotspot" style="top: 0%; left: 52%; width: 45%; height: 30%;" onclick="m2SelectSearchItem(false, '小紅蘿蔔')"></div>
-                </div>
-
-                <div id="m2Feedback" class="hint-box">請直接點擊相片中的「番茄」</div>
-            `;
-        } 
-        else if (m2Step === 2) { // 關卡1-B: 街市積木拼句 (隱藏直接提示 + 新增提示按鈕)
-            speakCantonese("請跟伙記講你想買咩。");
-            var blocks = ['唔該', '兩', '個', '一', '斤', '棵', '薯仔', '三', '我要', '番茄'];
-            var validAnswers = ['我要兩個番茄', '唔該我要兩個番茄', '我要兩個番茄唔該'];
-            renderSentenceStep("第一關：街市菜檔1 (2/3)", blocks, validAnswers, "我要兩個番茄");
-        } 
-        else if (m2Step === 3) { // 關卡1-C: 街市港幣付款
-            speakCantonese("番茄，好！秤咗呢度12蚊。");
-            renderPaymentStep("第一關：街市菜檔1 (3/3)", 12, "番茄，好！秤咗呢度$12蚊。");
-        } 
-        else if (m2Step === 4) { // 關卡2-A: 街市菜檔2尋詞 (真實相片點擊薯仔)
-            speakCantonese("接著嚟到第二間菜檔，請喺相片中點擊揀出薯仔。");
-            container.innerHTML = `
-                <div class="m2-badge">第二關：街市菜檔2 (1/3)</div>
-                <div class="m2-task-box">🍲 <b>任務：</b>買完番茄，依家要喺第二間菜檔買<b>兩個薯仔</b>。</div>
-                <h3 style="margin:8px 0;">請點擊相片中的「薯仔」🥔</h3>
-                
-                <div class="photo-map-container">
-                    <img src="market2.jpg" class="photo-map-img" alt="街市菜檔2">
-                    <!-- 薯仔熱區 (藍色籃子) -->
-                    <div class="hotspot" style="top: 52%; left: 12%; width: 38%; height: 32%;" onclick="m2SelectSearchItem(true, '薯仔')"></div>
-                    <!-- 其他干擾熱區 -->
-                    <div class="hotspot" style="top: 60%; left: 52%; width: 35%; height: 30%;" onclick="m2SelectSearchItem(false, '番茄')"></div>
-                    <div class="hotspot" style="top: 15%; left: 0%; width: 45%; height: 40%;" onclick="m2SelectSearchItem(false, '白菜')"></div>
-                    <div class="hotspot" style="top: 80%; left: 45%; width: 30%; height: 20%;" onclick="m2SelectSearchItem(false, '青瓜')"></div>
-                </div>
-
-                <div id="m2Feedback" class="hint-box">請直接點擊相片中的「薯仔」</div>
-            `;
-        } 
-        else if (m2Step === 5) { // 關卡2-B: 街市積木拼句 (薯仔)
-            speakCantonese("請跟伙記講你想買咩。");
-            var blocks = ['唔該', '兩', '個', '一', '斤', '棵', '排', '三', '我要', '薯仔'];
-            var validAnswers = ['我要兩個薯仔', '唔該我要兩個薯仔', '我要兩個薯仔唔該'];
-            renderSentenceStep("第二關：街市菜檔2 (2/3)", blocks, validAnswers, "我要兩個薯仔");
-        } 
-        else if (m2Step === 6) { // 關卡2-C: 街市港幣付款 ($15)
-            speakCantonese("兩個薯仔呢度15蚊。");
-            renderPaymentStep("第二關：街市菜檔2 (3/3)", 15, "兩個薯仔，秤咗呢度$15蚊。");
-        } 
-        else if (m2Step === 7) { // 通關結算畫面
-            speakCantonese("恭喜你！成功買齊材料！今晚有美味嘅番茄薯仔湯飲啦！");
-            container.innerHTML = `
-                <div style="font-size: 60px; margin: 10px 0;">🥣</div>
-                <h2 style="color: #4CAF50; margin-top:0;">恭喜通關！煲湯成功！</h2>
-                <div class="m2-task-box" style="text-align: left; background:#eef7ff; border-color:#bbdefb; color:#1565c0;">
-                    <b>🍲 番茄薯仔湯 材料結算：</b><br>
-                    • 番茄 2個：<b>$12</b><br>
-                    • 薯仔 2個：<b>$15</b><br>
-                    -----------------------------<br>
-                    <b>💰 總共付款：$27 港幣</b>
-                </div>
-                <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
-                    <button class="btn-primary" onclick="startModule2()">🔄 再玩一次買餸實戰</button>
-                    <button class="btn-next" style="background-color:#607D8B;" onclick="showMainMenu()">🏠 返回主選單</button>
-                </div>
-            `;
-        }
-        if (m2Step < 7) {
+    if (m2Step < 7) {
         startClinicalTimer();
     }
+}
 
-    /* 尋詞點擊反應 */
-    function m2SelectSearchItem(isCorrect, name) {
-        var fb = document.getElementById('m2Feedback');
-        if (isCorrect) {
-            recordSuccess();
-            fb.style.color = "#2e7d32";
-            fb.innerText = "🎉 答對咗！搵到「" + name + "」啦！";
-            speakCantonese("答對咗！搵到" + name + "啦！");
-            setTimeout(function() {
-                m2Step++;
-                renderM2();
-            }, 1600);
-        } else {
-            fb.style.color = "#d32f2f";
-            fb.innerText = "❌ 呢個係「" + name + "」，再點擊下啦！";
-            speakCantonese("呢個係" + name + "，再試下啦");
-        }
+function m2SelectSearchItem(isCorrect, name) {
+    var fb = document.getElementById('m2Feedback');
+    if (isCorrect) {
+        recordSuccess();
+        fb.style.color = "#2e7d32";
+        fb.innerText = "🎉 答對咗！搵到「" + name + "」啦！";
+        speakCantonese("答對咗！搵到" + name + "啦！");
+        setTimeout(function() {
+            m2Step++;
+            renderM2();
+        }, 1600);
+    } else {
+        fb.style.color = "#d32f2f";
+        fb.innerText = "❌ 呢個係「" + name + "」，再點擊下啦！";
+        speakCantonese("呢個係" + name + "，再試下啦");
     }
+}
 
-    /* 渲染積木拼句步驟 (優化語境 + 提示按鈕) */
-    function renderSentenceStep(stepTitle, blocks, validAnswers, hintText) {
-        var container = document.getElementById('module2Content');
+function renderSentenceStep(stepTitle, blocks, validAnswers, hintText) {
+    var container = document.getElementById('module2Content');
+    
+    var blocksHtml = blocks.map(function(b) {
+        return `<button class="m2-word-block" onclick="m2AddBlock('${b}')">${b}</button>`;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="m2-badge">${stepTitle}</div>
+        <h3 style="margin:5px 0 10px;">🗣️ 請跟伙記講你想買咩：</h3>
         
-        var blocksHtml = blocks.map(function(b) {
-            return `<button class="m2-word-block" onclick="m2AddBlock('${b}')">${b}</button>`;
-        }).join('');
+        <div class="m2-sentence-box" id="m2SentenceBox">請點擊下方積木...</div>
 
-        container.innerHTML = `
-            <div class="m2-badge">${stepTitle}</div>
-            <h3 style="margin:5px 0 10px;">🗣️ 請跟伙記講你想買咩：</h3>
-            
-            <div class="m2-sentence-box" id="m2SentenceBox">請點擊下方積木...</div>
-
-            <div class="m2-blocks-grid">
-                ${blocksHtml}
-            </div>
-
-            <div style="display: flex; gap: 8px; margin-top: 15px;">
-                <button style="background:#2196F3; color:white; flex:1; font-size:14px; padding:10px;" onclick="m2ShowHint('${hintText}')">💡 提示</button>
-                <button style="background:#ff9800; color:white; flex:1; font-size:14px; padding:10px;" onclick="m2ClearBlocks()">🗑️ 重設</button>
-                <button style="background:#4CAF50; color:white; flex:1.5; font-size:14px; padding:10px;" onclick="m2CheckSentence(${JSON.stringify(validAnswers).replace(/"/g, '&quot;')})">✅ 確認</button>
-            </div>
-            <div id="m2SentenceFeedback" class="status" style="margin-top:10px; font-size:15px; font-weight:bold;"></div>
-        `;
-    }
-
-    function m2ShowHint(hintText) {
-        var fb = document.getElementById('m2SentenceFeedback');
-        fb.style.color = "#0056b3";
-        fb.innerText = "💡 提示：你可以講「" + hintText + "」";
-        speakCantonese("你可以講：" + hintText);
-        recordCueing();
-    }
-
-    function m2AddBlock(word) {
-        m2SelectedBlocks.push(word);
-        var box = document.getElementById('m2SentenceBox');
-        box.innerText = m2SelectedBlocks.join(' ');
-        speakCantonese(word);
-    }
-
-    function m2ClearBlocks() {
-        m2SelectedBlocks = [];
-        var box = document.getElementById('m2SentenceBox');
-        box.innerText = "請點擊下方積木...";
-        document.getElementById('m2SentenceFeedback').innerText = "";
-    }
-
-    function m2CheckSentence(validAnswers) {
-        var result = m2SelectedBlocks.join('');
-        var fb = document.getElementById('m2SentenceFeedback');
-        
-        if (validAnswers.indexOf(result) !== -1) {
-            fb.style.color = "#2e7d32";
-            fb.innerText = "🎉 太棒了！講得好清楚！";
-            speakCantonese(m2SelectedBlocks.join('') + "。講得好棒！");
-            setTimeout(function() {
-                m2Step++;
-                renderM2();
-            }, 1800);
-            recordSuccess();
-        } else {
-            fb.style.color = "#d32f2f";
-            fb.innerText = "未啱喎，請重新試下拼句。";
-            speakCantonese("未啱喎，再試一下");
-        }
-    }
-
-    /* 渲染港幣付款步驟 (擬真港幣硬幣) */
-    function renderPaymentStep(stepTitle, targetAmount, vendorSpeech) {
-        var container = document.getElementById('module2Content');
-
-        container.innerHTML = `
-            <div class="m2-badge">${stepTitle}</div>
-            <div class="m2-vendor-say">🗣️ 伙計：「${vendorSpeech}」</div>
-
-            <div class="m2-pay-board">
-                <div>目標金額：<span style="color:#d32f2f; font-size:24px; font-weight:bold;">$${targetAmount}</span></div>
-                <div style="margin-top:5px;">目前已付：<span id="m2PaidText" style="color:#2e7d32; font-size:24px; font-weight:bold;">$0</span></div>
-            </div>
-
-            <div style="font-size:14px; font-weight:bold; color:#555;">點擊港幣硬幣進行付款：</div>
-            
-            <div class="m2-coins-row">
-                <div class="hk-coin coin-hk10" onclick="m2AddCoin(10, ${targetAmount})">$10</div>
-                <div class="hk-coin coin-hk5" onclick="m2AddCoin(5, ${targetAmount})">$5</div>
-                <div class="hk-coin coin-hk2" onclick="m2AddCoin(2, ${targetAmount})">$2</div>
-                <div class="hk-coin coin-hk1" onclick="m2AddCoin(1, ${targetAmount})">$1</div>
-            </div>
-
-            <button style="background:#9e9e9e; color:white; padding:8px 16px; margin-top:5px; font-size:14px; border-radius:20px;" onclick="m2ResetCoins(${targetAmount})">🔄 清除金額重新投幣</button>
-            <div id="m2PayFeedback" class="status" style="margin-top:10px; font-size:16px; font-weight:bold;"></div>
-        `;
-    }
-
-    function m2AddCoin(amount, target) {
-        m2PaidAmount += amount;
-        document.getElementById('m2PaidText').innerText = "$" + m2PaidAmount;
-        speakCantonese(amount + "蚊");
-
-        var fb = document.getElementById('m2PayFeedback');
-        if (m2PaidAmount === target) {
-            fb.style.color = "#2e7d32";
-            fb.innerText = "🎉 付款成功！啱啱好 $" + target + " 蚊！";
-            speakCantonese("收你" + target + "蚊，啱啱好！多謝！");
-            setTimeout(function() {
-                m2Step++;
-                renderM2();
-            }, 2000);
-            recordSuccess();
-        } else if (m2PaidAmount > target) {
-            fb.style.color = "#d32f2f";
-            fb.innerText = "⚠️ 俾多咗錢啦 ($" + m2PaidAmount + " 蚊)，幫你重新投幣！";
-            speakCantonese("俾多咗錢啦，請重新投幣");
-            setTimeout(function() {
-                m2ResetCoins(target);
-            }, 1500);
-        }
-    }
-
-    function m2ResetCoins(target) {
-        m2PaidAmount = 0;
-        var el = document.getElementById('m2PaidText');
-        if (el) el.innerText = "$0";
-        var fb = document.getElementById('m2PayFeedback');
-        if (fb) fb.innerText = "";
-    }
-
-
-    /* 初始化 */
-    window.onload = function() {
-        loadSavedQuestions();
-        initSpeechRecognition();
-        showMainMenu();
-    };
-    <!-- 臨床數據統計彈出視窗 -->
-<div class="modal" id="statsModal">
-    <div class="modal-content" style="max-width: 400px;">
-        <h3 style="margin-top:0; color: #2c3e50; text-align: center;">📊 臨床練習數據記錄</h3>
-        
-        <div style="background: #f8f9fa; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 15px;">
-            <p style="margin: 6px 0;">🎯 <b>練習總題數：</b><span id="statTotal">0</span> 題</p>
-            <p style="margin: 6px 0;">✅ <b>整體正確率：</b><span id="statAccuracy" style="color: #2e7d32; font-weight: bold;">0%</span></p>
-            <p style="margin: 6px 0;">⏱️ <b>平均反應時間：</b><span id="statAvgTime" style="color: #0056b3; font-weight: bold;">0</span> 秒/題</p>
-            <p style="margin: 6px 0;">💡 <b>Cueing（提示）總次數：</b><span id="statHints" style="color: #d32f2f; font-weight: bold;">0</span> 次</p>
+        <div class="m2-blocks-grid">
+            ${blocksHtml}
         </div>
 
-        <div style="display: flex; gap: 8px;">
-            <button style="background-color: #f44336; color: white; flex: 1; font-size: 13px; padding: 8px;" onclick="resetStats()">🗑️ 重設數據</button>
-            <button style="background-color: #607D8B; color: white; flex: 1; font-size: 13px; padding: 8px;" onclick="closeStatsModal()">關閉</button>
+        <div style="display: flex; gap: 8px; margin-top: 15px;">
+            <button style="background:#2196F3; color:white; flex:1; font-size:14px; padding:10px;" onclick="m2ShowHint('${hintText}')">💡 提示</button>
+            <button style="background:#ff9800; color:white; flex:1; font-size:14px; padding:10px;" onclick="m2ClearBlocks()">🗑️ 重設</button>
+            <button style="background:#4CAF50; color:white; flex:1.5; font-size:14px; padding:10px;" onclick="m2CheckSentence(${JSON.stringify(validAnswers).replace(/"/g, '&quot;')})">✅ 確認</button>
         </div>
-    </div>
-</div>
+        <div id="m2SentenceFeedback" class="status" style="margin-top:10px; font-size:15px; font-weight:bold;"></div>
+    `;
+}
+
+function m2ShowHint(hintText) {
+    var fb = document.getElementById('m2SentenceFeedback');
+    fb.style.color = "#0056b3";
+    fb.innerText = "💡 提示：你可以講「" + hintText + "」";
+    speakCantonese("你可以講：" + hintText);
+    recordCueing();
+}
+
+function m2AddBlock(word) {
+    m2SelectedBlocks.push(word);
+    var box = document.getElementById('m2SentenceBox');
+    box.innerText = m2SelectedBlocks.join(' ');
+    speakCantonese(word);
+}
+
+function m2ClearBlocks() {
+    m2SelectedBlocks = [];
+    var box = document.getElementById('m2SentenceBox');
+    box.innerText = "請點擊下方積木...";
+    document.getElementById('m2SentenceFeedback').innerText = "";
+}
+
+function m2CheckSentence(validAnswers) {
+    var result = m2SelectedBlocks.join('');
+    var fb = document.getElementById('m2SentenceFeedback');
+    
+    if (validAnswers.indexOf(result) !== -1) {
+        recordSuccess();
+        fb.style.color = "#2e7d32";
+        fb.innerText = "🎉 太棒了！講得好清楚！";
+        speakCantonese(m2SelectedBlocks.join('') + "。講得好棒！");
+        setTimeout(function() {
+            m2Step++;
+            renderM2();
+        }, 1800);
+    } else {
+        fb.style.color = "#d32f2f";
+        fb.innerText = "未啱喎，請重新試下拼句。";
+        speakCantonese("未啱喎，再試一下");
+    }
+}
+
+function renderPaymentStep(stepTitle, targetAmount, vendorSpeech) {
+    var container = document.getElementById('module2Content');
+
+    container.innerHTML = `
+        <div class="m2-badge">${stepTitle}</div>
+        <div class="m2-vendor-say">🗣️ 伙計：「${vendorSpeech}」</div>
+
+        <div class="m2-pay-board">
+            <div>目標金額：<span style="color:#d32f2f; font-size:24px; font-weight:bold;">$${targetAmount}</span></div>
+            <div style="margin-top:5px;">目前已付：<span id="m2PaidText" style="color:#2e7d32; font-size:24px; font-weight:bold;">$0</span></div>
+        </div>
+
+        <div style="font-size:14px; font-weight:bold; color:#555;">點擊港幣硬幣進行付款：</div>
+        
+        <div class="m2-coins-row">
+            <div class="hk-coin coin-hk10" onclick="m2AddCoin(10, ${targetAmount})">$10</div>
+            <div class="hk-coin coin-hk5" onclick="m2AddCoin(5, ${targetAmount})">$5</div>
+            <div class="hk-coin coin-hk2" onclick="m2AddCoin(2, ${targetAmount})">$2</div>
+            <div class="hk-coin coin-hk1" onclick="m2AddCoin(1, ${targetAmount})">$1</div>
+        </div>
+
+        <button style="background:#9e9e9e; color:white; padding:8px 16px; margin-top:5px; font-size:14px; border-radius:20px;" onclick="m2ResetCoins(${targetAmount})">🔄 清除金額重新投幣</button>
+        <div id="m2PayFeedback" class="status" style="margin-top:10px; font-size:16px; font-weight:bold;"></div>
+    `;
+}
+
+function m2AddCoin(amount, target) {
+    m2PaidAmount += amount;
+    document.getElementById('m2PaidText').innerText = "$" + m2PaidAmount;
+    speakCantonese(amount + "蚊");
+
+    var fb = document.getElementById('m2PayFeedback');
+    if (m2PaidAmount === target) {
+        recordSuccess();
+        fb.style.color = "#2e7d32";
+        fb.innerText = "🎉 付款成功！啱啱好 $" + target + " 蚊！";
+        speakCantonese("收你" + target + "蚊，啱啱好！多謝！");
+        setTimeout(function() {
+            m2Step++;
+            renderM2();
+        }, 2000);
+    } else if (m2PaidAmount > target) {
+        fb.style.color = "#d32f2f";
+        fb.innerText = "⚠️ 俾多咗錢啦 ($" + m2PaidAmount + " 蚊)，幫你重新投幣！";
+        speakCantonese("俾多咗錢啦，請重新投幣");
+        setTimeout(function() {
+            m2ResetCoins(target);
+        }, 1500);
+    }
+}
+
+function m2ResetCoins(target) {
+    m2PaidAmount = 0;
+    var el = document.getElementById('m2PaidText');
+    if (el) el.innerText = "$0";
+    var fb = document.getElementById('m2PayFeedback');
+    if (fb) fb.innerText = "";
+}
+
+window.onload = function() {
+    loadSavedQuestions();
+    initSpeechRecognition();
+    showMainMenu();
+};
 </script>
 
 </body>
