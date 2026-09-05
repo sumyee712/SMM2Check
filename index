@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>廣東話語言復康系統 - 雙模組綜合版</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+        }
+
+        /* 頂部導航按鈕 */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .btn-back-menu {
+            background-color: #607D8B;
+            color: white;
+            padding: 6px 14px;
+            font-size: 14px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* 主選單專用樣式 */
+        .menu-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .menu-subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 25px;
+        }
+        .menu-btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .menu-btn {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+            padding: 18px 20px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
+            transition: transform 0.1s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .menu-btn-m2 {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            box-shadow: 0 6px 12px rgba(255, 152, 0, 0.3);
+        }
+        .menu-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 模組一樣式保留 */
+        .filter-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        select {
+            padding: 8px 12px;
+            font-size: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            outline: none;
+        }
+        .image-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 10px;
+            border-radius: 15px;
+            background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            object-fit: cover;
+            border: 2px solid #e0e0e0;
+        }
+        .hint-box {
+            min-height: 45px;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #eef7ff;
+            border-radius: 10px;
+            color: #0056b3;
+            font-size: 17px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .heard-box {
+            font-size: 15px;
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            min-height: 24px;
+            word-break: break-all;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+        button {
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary { background-color: #4CAF50; color: white; width: 100%; font-size: 18px; padding: 14px; }
+        .btn-hint { background-color: #2196F3; color: white; }
+        .btn-manual { background-color: #9C27B0; color: white; }
+        .btn-next { background-color: #ff9800; color: white; }
+        .btn-add { background-color: #795548; color: white; margin-top: 10px; font-size: 14px; padding: 8px 16px; }
+        .btn-clear { background-color: #e91e63; color: white; margin-top: 10px; font-size: 12px; padding: 5px 10px; border-radius: 8px; }
+        
+        button.mic-active {
+            background-color: #f44336;
+            animation: pulse 1.2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        .status {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            width: 85%;
+            max-width: 350px;
+            text-align: left;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 8px;
+            margin: 6px 0 12px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        /* 模組二 (買餸實戰) 專用 UI 樣式 */
+        .m2-badge {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .m2-task-box {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            color: #8c6d1f;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            text-align: left;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        .m2-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .m2-item-btn {
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 15px 5px;
+            font-size: 40px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        .m2-item-btn span {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .m2-item-btn:hover {
+            border-color: #4CAF50;
+            background-color: #f1f8e9;
+        }
+        /* 積木樣式 */
+        .m2-sentence-box {
+            min-height: 50px;
+            background: #f5f5f5;
+            border: 2px dashed #bdbdbd;
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .m2-blocks-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .m2-word-block {
+            background: #2196F3;
+            color: white;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+            border: none;
+        }
+        .m2-word-block:active {
+            transform: scale(0.95);
+            background: #1976D2;
+        }
+        /* 付款與硬幣樣式 */
+        .m2-vendor-say {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border: 1px solid #c8e6c9;
+        }
+        .m2-pay-board {
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        .m2-coins-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .coin-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
+        }
+        .coin-btn:active { transform: scale(0.9); }
+        .coin-10 {
+            width: 68px; height: 68px;
+            background: radial-gradient(circle, #e0e0e0 48%, #ffd700 50%);
+            border: 3px solid #d4af37; color: #333; font-size: 20px;
+        }
+        .coin-5 {
+            width: 65px; height: 65px;
+            background: #e0e0e0; border: 4px solid #b0b0b0; color: #222; font-size: 19px;
+        }
+        .coin-2 {
+            width: 58px; height: 58px;
+            background: #e8e8e8; border: 3px dashed #999; color: #222; font-size: 17px;
+        }
+        .coin-1 {
+            width: 52px; height: 52px;
+            background: #f0f0f0; border: 3px solid #ccc; color: #222; font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    <!-- ==================== 主選單介面 (MAIN MENU) ==================== -->
+    <div id="mainMenuView">
+        <div style="background-color: #fff3cd; color: #856404; padding: 6px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-bottom: 12px; border: 1px solid #ffeeba;">
+            ⚠️ 廣東話語言復康訓練系統
+        </div>
+
+        <div class="menu-title">🧠 語言復康訓練</div>
+        <div class="menu-subtitle">請點選下方模組開始進行練習</div>
+
+        <div class="menu-btn-container">
+            <button class="menu-btn" onclick="startModule1()">
+                <span style="font-size: 32px;">🧩</span>
+                <div>
+                    <div>模組一：基礎尋詞練習</div>
+                    <div style="font-size: 12px; opacity: 0.85; font-weight: normal; margin-top: 3px;">圖片命名、語意提示、語音辨識</div>
+                </div>
+            </button>
+
+            <button class="menu-btn menu-btn-m2" onclick="startModule2()">
+                <span style="font-size: 32px;">🛒</span>
+                <div>
+                    <div>模組二：社區街市買餸實戰</div>
+                    <div style="font-size: 12px; opacity: 0.85; font-weight: normal; margin-top: 3px;">街市尋詞、積木拼句、港幣找數</div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== 模組一：基礎尋詞練習 (舊有功能完整保留) ==================== -->
+    <div id="module1View" style="display: none;">
+        <div class="top-nav">
+            <button class="btn-back-menu" onclick="showMainMenu()">🏠 返回主選單</button>
+            <span style="font-size: 13px; color: #777; font-weight: bold;">模組一：尋詞訓練</span>
+        </div>
+
+        <div class="filter-container">
+            <select id="categorySelect" onchange="filterQuestions()">
+                <option value="all">所有類別</option>
+                <option value="custom">📷 自訂照片</option>
+                <option value="food">飲食水果</option>
+                <option value="daily">生活用品</option>
+                <option value="transport">交通工具</option>
+            </select>
+            <select id="difficultySelect" onchange="filterQuestions()">
+                <option value="all">所有難度</option>
+                <option value="1">簡單</option>
+                <option value="2">中等</option>
+            </select>
+        </div>
+
+        <h2 style="margin: 5px 0 10px; font-size: 20px;">呢個係咩嚟？請講出嚟</h2>
+        
+        <div id="imageDisplayArea">
+            <img id="displayImage" class="image-container" src="" alt="訓練圖片" style="display:none;">
+            <div id="displayEmoji" class="image-container">🪥</div>
+        </div>
+
+        <div class="hint-box" id="hintBox">按「開始講嘢」講出名稱</div>
+        <div class="heard-box" id="heardBox">聽到的聲音會顯示喺度...</div>
+        
+        <button class="btn-primary" id="micBtn" onclick="toggleListening()">🎤 開始講嘢</button>
+        
+        <div class="btn-group" style="margin-top: 10px;">
+            <button class="btn-hint" onclick="giveManualHint()">💡 提示</button>
+            <button class="btn-manual" onclick="manualPass()">👍 講得啱</button>
+            <button class="btn-next" onclick="nextQuestion()">➡️ 下一題</button>
+        </div>
+
+        <button class="btn-add" onclick="openAddModal()">➕ 家屬新增題目/上傳照片</button>
+        <br>
+        <button class="btn-clear" onclick="clearCustomQuestions()">🗑️ 清除所有自訂題目</button>
+
+        <div class="status" id="statusText">狀態：準備就緒 (廣東話模式)</div>
+    </div>
+
+    <!-- ==================== 模組二：社區街市買餸實戰 (全新IADL關卡) ==================== -->
+    <div id="module2View" style="display: none;">
+        <div class="top-nav">
+            <button class="btn-back-menu" onclick="showMainMenu()">🏠 返回主選單</button>
+            <span style="font-size: 13px; color: #777; font-weight: bold;">模組二：買餸實戰</span>
+        </div>
+
+        <div id="module2Content">
+            <!-- 動態由 JavaScript 繪製關卡步驟內容 -->
+        </div>
+    </div>
+
+</div>
+
+<!-- 模組一彈出視窗：新增自訂題目 -->
+<div class="modal" id="addModal">
+    <div class="modal-content">
+        <h3 style="margin-top:0;">新增自訂題目</h3>
+        <label>1. 選擇照片（可拍照或從相簿選擇）：</label>
+        <input type="file" id="customImageInput" accept="image/*">
+        
+        <label>2. 正確名稱（如：大咀鳥杯）：</label>
+        <input type="text" id="customNameInput" placeholder="例如：水杯">
+        
+        <label>3. 語意提示（可不填）：</label>
+        <input type="text" id="customSemanticInput" placeholder="例如：平時用嚟喝水嘅杯">
+        
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button style="background-color: #4CAF50; color: white; flex: 1;" onclick="saveCustomQuestion()">儲存</button>
+            <button style="background-color: #9e9e9e; color: white; flex: 1;" onclick="closeAddModal()">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* =========================================================================
+       通用 / 主選單 控制邏輯
+    ========================================================================= */
+    function showMainMenu() {
+        document.getElementById('mainMenuView').style.display = 'block';
+        document.getElementById('module1View').style.display = 'none';
+        document.getElementById('module2View').style.display = 'none';
+
+        // 停止模組一的語音辨識與朗讀
+        if (isListening && recognition) {
+            try { recognition.stop(); } catch(e){}
+        }
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    function startModule1() {
+        document.getElementById('mainMenuView').style.display = 'none';
+        document.getElementById('module1View').style.display = 'block';
+        document.getElementById('module2View').style.display = 'none';
+
+        loadSavedQuestions();
+        filterQuestions();
+    }
+
+    function startModule2() {
+        document.getElementById('mainMenuView').style.display = 'none';
+        document.getElementById('module1View').style.display = 'none';
+        document.getElementById('module2View').style.display = 'block';
+
+        m2Step = 1;
+        renderM2();
+    }
+
+    function speakCantonese(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            var utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-HK';
+            utterance.rate = 0.85;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+
+    /* =========================================================================
+       模組一：原版核心邏輯 (完整無損保留)
+    ========================================================================= */
+    var defaultQuestions = [
+        // 飲食水果 (food)
+        { name: "蘋果", category: "food", level: 1, keywords: ["蘋果", "屏果", "平果", "苹果", "個蘋果", "一個蘋果"], emoji: "🍎", semantic: "一種紅色嘅水果，甜甜地嘅", phonemic: "第一個字係『ping4』（平）..." },
+        { name: "香蕉", category: "food", level: 1, keywords: ["香蕉", "鄉蕉", "隻香蕉", "一隻香蕉"], emoji: "🍌", semantic: "黃色長條形嘅水果，剝皮食嘅", phonemic: "第一個字係『hoeng1』（香）..." },
+        { name: "西瓜", category: "food", level: 1, keywords: ["西瓜", "綠色西瓜", "個西瓜"], emoji: "🍉", semantic: "夏天成日食、綠色皮紅色肉嘅大水果", phonemic: "第一個字係『sai1』（西）..." },
+        { name: "珍珠奶茶", category: "food", level: 2, keywords: ["奶茶", "珍珠奶茶", "一杯奶茶"], emoji: "🧋", semantic: "台灣出名嘅飲品", phonemic: "第一個字係『naai5』（奶）..." },
+        
+        // 生活用品 (daily)
+        { name: "牙刷", category: "daily", level: 1, keywords: ["牙刷", "芽刷", "雅刷", "牙刷仔", "一把牙刷", "一支牙刷"], emoji: "🪥", semantic: "每日屋企刷牙用嘅工具", phonemic: "第一個字係『ngaa4』（牙）..." },
+        { name: "眼鏡", category: "daily", level: 1, keywords: ["眼鏡", "眼精", "眼鏡兒", "一副眼鏡", "戴眼鏡"], emoji: "👓", semantic: "令我地睇嘢清楚啲嘢", phonemic: "第一個字係『ngaan5』（眼）..." },
+        { name: "手錶", category: "daily", level: 1, keywords: ["手錶", "手表", "隻手錶", "一隻手錶"], emoji: "⌚", semantic: "戴喺手腕睇時間嘅嘢", phonemic: "第一個字係『sau2』（手）..." },
+        { name: "雨傘", category: "daily", level: 2, keywords: ["雨傘", "遮", "一把遮", "雨遮", "一把雨傘"], emoji: "☂️", semantic: "落雨嗰陣用嚟遮雨嘅工具", phonemic: "第一個字係『jyu5』（雨）..." },
+
+        // 交通工具 (transport)
+        { name: "巴士", category: "transport", level: 1, keywords: ["巴士", "雙層巴士", "搭巴士", "公車"], emoji: "🚌", semantic: "馬路上載好多乘客嘅大型公共交通工具", phonemic: "第一個字係『baa1』（巴）..." },
+        { name: "計程車", category: "transport", level: 1, keywords: ["的士", "啲士", "搭的士", "紅的"], emoji: "🚕", semantic: "招手即停、按錶收費嘅汽車", phonemic: "第一個字係『dik1』（的）..." },
+        { name: "飛機", category: "transport", level: 2, keywords: ["飛機", "架飛機", "搭飛機"], emoji: "✈️", semantic: "喺天空飛、帶人去旅行嘅交通工具", phonemic: "第一個字係『fei1』（飛）..." },
+
+        // 身體部位 (body)
+        { name: "眼睛", category: "body", level: 1, keywords: ["眼睛", "眼珠", "一雙眼睛", "隻眼"], emoji: "👁️", semantic: "面部用嚟睇嘢嘅器官", phonemic: "第一個字係『ngaan5』（眼）..." },
+        { name: "耳朵", category: "body", level: 1, keywords: ["耳朵", "耳仔", "隻耳仔"], emoji: "👂", semantic: "頭部兩旁用嚟聽聲音嘅器官", phonemic: "第一個字係『ji5』（耳）..." },
+        { name: "手掌", category: "body", level: 2, keywords: ["手掌", "隻手", "手板"], emoji: "✋", semantic: "用嚟拿嘢、握手嘅身體部位", phonemic: "第一個字係『sau2』（手）..." }
+    ];
+    
+    var rawQuestions = [];
+    var activeQuestions = [];
+    var currentIndex = 0;
+    var recognition = null;
+    var isListening = false;
+    var hintLevel = 0;
+    var hasAnswered = false;
+
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    function loadSavedQuestions() {
+        var saved = localStorage.getItem('cantonese_rehab_custom_q');
+        var customList = saved ? JSON.parse(saved) : [];
+        rawQuestions = customList.concat(defaultQuestions);
+    }
+
+    function filterQuestions() {
+        var cat = document.getElementById('categorySelect').value;
+        var diff = document.getElementById('difficultySelect').value;
+
+        activeQuestions = rawQuestions.filter(function(q) {
+            var matchCat = (cat === 'all' || q.category === cat);
+            var matchDiff = (diff === 'all' || q.level.toString() === diff);
+            return matchCat && matchDiff;
+        });
+
+        if (activeQuestions.length === 0) {
+            activeQuestions = rawQuestions;
+        }
+        currentIndex = 0;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (activeQuestions.length === 0) return;
+        var current = activeQuestions[currentIndex];
+
+        var imgEl = document.getElementById('displayImage');
+        var emojiEl = document.getElementById('displayEmoji');
+
+        if (current.image) {
+            imgEl.src = current.image;
+            imgEl.style.display = 'block';
+            emojiEl.style.display = 'none';
+        } else {
+            emojiEl.innerText = current.emoji || "❓";
+            emojiEl.style.display = 'flex';
+            imgEl.style.display = 'none';
+        }
+
+        document.getElementById('hintBox').innerText = "按「開始講嘢」講出名稱";
+        document.getElementById('heardBox').innerText = "聽到的聲音會顯示喺度...";
+        document.getElementById('statusText').innerText = "狀態：準備就緒 (廣東話模式)";
+        hintLevel = 0;
+        hasAnswered = false;
+    }
+
+    function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
+    function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
+
+    function compressImage(file, callback) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = new Image();
+            img.onload = function() {
+                var canvas = document.createElement('canvas');
+                var max_size = 400;
+                var width = img.width;
+                var height = img.height;
+
+                if (width > height) {
+                    if (width > max_size) {
+                        height *= max_size / width;
+                        width = max_size;
+                    }
+                } else {
+                    if (height > max_size) {
+                        width *= max_size / height;
+                        height = max_size;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                var compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                callback(compressedDataUrl);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function saveCustomQuestion() {
+        var fileInput = document.getElementById('customImageInput');
+        var nameInput = document.getElementById('customNameInput').value.trim();
+        var semanticInput = document.getElementById('customSemanticInput').value.trim();
+
+        if (!fileInput.files || !fileInput.files[0]) {
+            alert("請選擇照片或即時拍攝照片！");
+            return;
+        }
+        if (!nameInput) {
+            alert("請輸入名稱！");
+            return;
+        }
+
+        compressImage(fileInput.files[0], function(compressedBase64) {
+            var newQuestion = {
+                name: nameInput,
+                category: "custom",
+                level: 1,
+                keywords: [nameInput],
+                image: compressedBase64,
+                semantic: semanticInput || ("呢個係" + nameInput),
+                phonemic: "第一個字係『" + nameInput.charAt(0) + "』..."
+            };
+
+            var saved = localStorage.getItem('cantonese_rehab_custom_q');
+            var customList = saved ? JSON.parse(saved) : [];
+            customList.unshift(newQuestion);
+            
+            try {
+                localStorage.setItem('cantonese_rehab_custom_q', JSON.stringify(customList));
+            } catch (err) {
+                alert("儲存空間已滿，請刪除部分舊相片再試。");
+                return;
+            }
+
+            loadSavedQuestions();
+            document.getElementById('categorySelect').value = 'custom';
+            filterQuestions();
+            closeAddModal();
+
+            document.getElementById('customNameInput').value = '';
+            document.getElementById('customSemanticInput').value = '';
+            fileInput.value = '';
+        });
+    }
+
+    function clearCustomQuestions() {
+        if (confirm("確定要刪除所有上傳過的照片題目嗎？")) {
+            localStorage.removeItem('cantonese_rehab_custom_q');
+            loadSavedQuestions();
+            document.getElementById('categorySelect').value = 'all';
+            filterQuestions();
+        }
+    }
+
+    function initSpeechRecognition() {
+        if (!SpeechRecognition) {
+            document.getElementById('statusText').innerText = "⚠️ 瀏覽器不支援語音辨識（建議使用 Chrome/Safari）";
+            return;
+        }
+
+        recognition = new SpeechRecognition();
+        recognition.lang = 'zh-HK';
+        recognition.continuous = false;
+        recognition.interimResults = true;
+
+        recognition.onstart = function() {
+            isListening = true;
+            hasAnswered = false;
+            document.getElementById('micBtn').classList.add('mic-active');
+            document.getElementById('micBtn').innerText = "🎙️ 聽緊你講嘢...";
+            document.getElementById('statusText').innerText = "請講出圖中物品嘅廣東話名稱";
+            document.getElementById('heardBox').innerText = "聽緊...";
+        };
+
+        recognition.onresult = function(event) {
+            var transcript = '';
+            for (var i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            
+            var cleanText = transcript.replace(/[.,!?。，！？\s]/g, '');
+            document.getElementById('heardBox').innerText = "聽到的內容：「" + cleanText + "」";
+
+            if (!hasAnswered && cleanText.length > 0) {
+                checkAnswer(cleanText);
+            }
+        };
+
+        recognition.onerror = function(event) {
+            if (event.error !== 'no-speech') {
+                document.getElementById('statusText').innerText = "收音不清晰，家屬可按「講得啱」過關";
+            }
+            stopListeningState();
+        };
+
+        recognition.onend = function() { stopListeningState(); };
+    }
+
+    function stopListeningState() {
+        isListening = false;
+        var btn = document.getElementById('micBtn');
+        if (btn) {
+            btn.classList.remove('mic-active');
+            btn.innerText = "🎤 開始講嘢";
+        }
+    }
+
+    function toggleListening() {
+        if (!recognition) {
+            alert("請使用 Chrome 或 Safari 瀏覽器開啟此網頁。");
+            return;
+        }
+
+        if (isListening) {
+            try { recognition.stop(); } catch(e) {}
+        } else {
+            try {
+                recognition.lang = 'zh-HK';
+                recognition.start();
+            } catch (e) {
+                try {
+                    recognition.stop();
+                    setTimeout(function() {
+                        recognition.lang = 'zh-HK';
+                        recognition.start();
+                    }, 200);
+                } catch(err) {}
+            }
+        }
+    }
+
+    function checkAnswer(userInput) {
+        if (!userInput) return;
+        var current = activeQuestions[currentIndex];
+
+        var isCorrect = current.keywords.some(function(key) {
+            return userInput.indexOf(key) !== -1;
+        });
+
+        if (isCorrect) {
+            handleSuccess("🎉 答對咗！好棒！");
+        }
+    }
+
+    function manualPass() { handleSuccess("👍 家屬確認答對！太棒了！"); }
+
+    function handleSuccess(msg) {
+        if (hasAnswered) return;
+        hasAnswered = true;
+        try { recognition.stop(); } catch(e) {}
+
+        var current = activeQuestions[currentIndex];
+        document.getElementById('hintBox').innerText = msg;
+        speakCantonese("答對咗，呢個係" + current.name);
+        
+        setTimeout(function() { nextQuestion(); }, 2200);
+    }
+
+    function giveManualHint() {
+        if (activeQuestions.length === 0) return;
+        var current = activeQuestions[currentIndex];
+        hintLevel++;
+        if (hintLevel === 1) {
+            document.getElementById('hintBox').innerText = "提示：" + current.semantic;
+            speakCantonese(current.semantic);
+        } else if (hintLevel === 2) {
+            document.getElementById('hintBox').innerText = "發音提示：" + current.phonemic;
+            speakCantonese(current.phonemic);
+        } else {
+            document.getElementById('hintBox').innerText = "答案係：" + current.name;
+            speakCantonese("呢個就係" + current.name);
+        }
+    }
+
+    function nextQuestion() {
+        if (activeQuestions.length === 0) return;
+        currentIndex = (currentIndex + 1) % activeQuestions.length;
+        loadQuestion();
+    }
+
+
+    /* =========================================================================
+       模組二：社區街市買餸實戰 (全新狀態機邏輯)
+    ========================================================================= */
+    var m2Step = 1; // 狀態：1=街市尋詞(番茄), 2=街市拼句, 3=街市付款, 4=超市尋詞(雞蛋), 5=超市拼句, 6=超市付款, 7=通關結算
+    var m2SelectedBlocks = [];
+    var m2PaidAmount = 0;
+
+    function renderM2() {
+        m2SelectedBlocks = [];
+        m2PaidAmount = 0;
+        var container = document.getElementById('module2Content');
+
+        if (m2Step === 1) { // 關卡1-A: 街市菜檔尋詞
+            speakCantonese("今晚想煮番茄炒蛋，你要買兩個番茄同埋一排雞蛋。先喺菜檔揀兩個番茄。");
+            container.innerHTML = `
+                <div class="m2-badge">第一關：街市菜檔 (1/3)</div>
+                <div class="m2-task-box">💡 <b>任務：</b>今晚想煮番茄炒蛋，你要買<b>兩個番茄</b>、<b>一排雞蛋</b>。</div>
+                <h3 style="margin:10px 0;">請喺菜檔點擊揀出「番茄」🍅</h3>
+                <div class="m2-grid">
+                    <button class="m2-item-btn" onclick="m2SelectSearchItem(true, '番茄')">
+                        🍅<span>番茄</span>
+                    </button>
+                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '西蘭花')">
+                        🥦<span>西蘭花</span>
+                    </button>
+                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '薯仔')">
+                        🥔<span>薯仔</span>
+                    </button>
+                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '白菜')">
+                        🥬<span>白菜</span>
+                    </button>
+                </div>
+                <div id="m2Feedback" class="hint-box">請點擊上方圖片選擇物品</div>
+            `;
+        } 
+        else if (m2Step === 2) { // 關卡1-B: 街市積木拼句
+            speakCantonese("請點擊積木，拼出我要兩個番茄。");
+            var blocks = ['唔該', '兩', '個', '一', '斤', '棵', '薯仔', '三', '我要', '番茄'];
+            var validAnswers = ['我要兩個番茄', '唔該我要兩個番茄', '我要兩個番茄唔該'];
+            renderSentenceStep("第一關：街市菜檔 (2/3)", blocks, validAnswers, "我要兩個番茄");
+        } 
+        else if (m2Step === 3) { // 關卡1-C: 街市港幣付款
+            speakCantonese("番茄，好！秤咗呢度12蚊。");
+            renderPaymentStep("第一關：街市菜檔 (3/3)", 12, "番茄，好！秤咗呢度$12蚊。");
+        } 
+        else if (m2Step === 4) { // 關卡2-A: 超市尋詞
+            speakCantonese("然後再去超市，揀出雞蛋。");
+            container.innerHTML = `
+                <div class="m2-badge">第二關：超級市場 (1/3)</div>
+                <div class="m2-task-box">💡 <b>任務：</b>依家嚟到超市，要買<b>一排雞蛋</b>。</div>
+                <h3 style="margin:10px 0;">請喺貨架點擊揀出「雞蛋」🥚</h3>
+                <div class="m2-grid">
+                    <button class="m2-item-btn" onclick="m2SelectSearchItem(true, '雞蛋')">
+                        🥚<span>雞蛋</span>
+                    </button>
+                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '牛奶')">
+                        🥛<span>牛奶</span>
+                    </button>
+                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '麵包')">
+                        🍞<span>麵包</span>
+                    </button>
+                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '果汁')">
+                        🧃<span>果汁</span>
+                    </button>
+                </div>
+                <div id="m2Feedback" class="hint-box">請點擊上方圖片選擇物品</div>
+            `;
+        } 
+        else if (m2Step === 5) { // 關卡2-B: 超市積木拼句
+            speakCantonese("請點擊積木，拼出我要一排雞蛋。");
+            var blocks = ['唔該', '兩', '個', '一', '斤', '棵', '排', '三', '我要', '雞蛋'];
+            var validAnswers = ['我要一排雞蛋', '唔該我要一排雞蛋', '我要一排雞蛋唔該'];
+            renderSentenceStep("第二關：超級市場 (2/3)", blocks, validAnswers, "我要一排雞蛋");
+        } 
+        else if (m2Step === 6) { // 關卡2-C: 超市港幣付款
+            speakCantonese("一排雞蛋呢度17蚊。");
+            renderPaymentStep("第二關：超級市場 (3/3)", 17, "一排雞蛋呢度$17蚊。");
+        } 
+        else if (m2Step === 7) { // 通關結算畫面
+            speakCantonese("恭喜你！成功完成買餸任務！太棒了！");
+            container.innerHTML = `
+                <div style="font-size: 60px; margin: 10px 0;">🎉</div>
+                <h2 style="color: #4CAF50; margin-top:0;">恭喜通關！買餸成功！</h2>
+                <div class="m2-task-box" style="text-align: left; background:#eef7ff; border-color:#bbdefb; color:#1565c0;">
+                    <b>🛒 今日戰利品結算：</b><br>
+                    • 番茄 2個：<b>$12</b><br>
+                    • 雞蛋 1排：<b>$17</b><br>
+                    -----------------------------<br>
+                    <b>💰 總共付款：$29 港幣</b>
+                </div>
+                <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn-primary" onclick="startModule2()">🔄 再玩一次買餸實戰</button>
+                    <button class="btn-next" style="background-color:#607D8B;" onclick="showMainMenu()">🏠 返回主選單</button>
+                </div>
+            `;
+        }
+    }
+
+    // 尋詞點擊反應
+    function m2SelectSearchItem(isCorrect, name) {
+        var fb = document.getElementById('m2Feedback');
+        if (isCorrect) {
+            fb.style.color = "#2e7d32";
+            fb.innerText = "🎉 答對咗！搵到「" + name + "」啦！";
+            speakCantonese("答對咗！搵到" + name + "啦！");
+            setTimeout(function() {
+                m2Step++;
+                renderM2();
+            }, 1600);
+        } else {
+            fb.style.color = "#d32f2f";
+            fb.innerText = "❌ 呢個係「" + name + "」，再試下啦！";
+            speakCantonese("呢個係" + name + "，再試下啦");
+        }
+    }
+
+    // 渲染積木拼句步驟
+    function renderSentenceStep(stepTitle, blocks, validAnswers, targetPrompt) {
+        var container = document.getElementById('module2Content');
+        
+        var blocksHtml = blocks.map(function(b) {
+            return `<button class="m2-word-block" onclick="m2AddBlock('${b}')">${b}</button>`;
+        }).join('');
+
+        container.innerHTML = `
+            <div class="m2-badge">${stepTitle}</div>
+            <h3 style="margin:5px 0 10px;">請依序點選積木：「${targetPrompt}」</h3>
+            <div style="font-size:12px; color:#666; margin-bottom:10px;">（提示：「唔該」可放在最前或最後）</div>
+            
+            <div class="m2-sentence-box" id="m2SentenceBox">請點擊下方積木...</div>
+
+            <div class="m2-blocks-grid">
+                ${blocksHtml}
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button style="background:#ff9800; color:white; flex:1;" onclick="m2ClearBlocks()">🗑️ 重設</button>
+                <button style="background:#4CAF50; color:white; flex:2;" onclick="m2CheckSentence(${JSON.stringify(validAnswers).replace(/"/g, '&quot;')})">✅ 確認答案</button>
+            </div>
+            <div id="m2SentenceFeedback" class="status" style="margin-top:10px; font-size:15px; font-weight:bold;"></div>
+        `;
+    }
+
+    function m2AddBlock(word) {
+        m2SelectedBlocks.push(word);
+        var box = document.getElementById('m2SentenceBox');
+        box.innerText = m2SelectedBlocks.join(' ');
+        speakCantonese(word);
+    }
+
+    function m2ClearBlocks() {
+        m2SelectedBlocks = [];
+        var box = document.getElementById('m2SentenceBox');
+        box.innerText = "請點擊下方積木...";
+        document.getElementById('m2SentenceFeedback').innerText = "";
+    }
+
+    function m2CheckSentence(validAnswers) {
+        var result = m2SelectedBlocks.join('');
+        var fb = document.getElementById('m2SentenceFeedback');
+        
+        if (validAnswers.indexOf(result) !== -1) {
+            fb.style.color = "#2e7d32";
+            fb.innerText = "🎉 太棒了！拼句完全正確！";
+            speakCantonese(m2SelectedBlocks.join('') + "。講得好棒！");
+            setTimeout(function() {
+                m2Step++;
+                renderM2();
+            }, 1800);
+        } else {
+            fb.style.color = "#d32f2f";
+            fb.innerText = "未啱喎，請重新試下拼句。";
+            speakCantonese("未啱喎，再試一下");
+        }
+    }
+
+    // 渲染港幣付款步驟
+    function renderPaymentStep(stepTitle, targetAmount, vendorSpeech) {
+        var container = document.getElementById('module2Content');
+
+        container.innerHTML = `
+            <div class="m2-badge">${stepTitle}</div>
+            <div class="m2-vendor-say">🗣️ 伙計：「${vendorSpeech}」</div>
+
+            <div class="m2-pay-board">
+                <div>目標金額：<span style="color:#d32f2f; font-size:24px; font-weight:bold;">$${targetAmount}</span></div>
+                <div style="margin-top:5px;">目前已投：<span id="m2PaidText" style="color:#2e7d32; font-size:24px; font-weight:bold;">$0</span></div>
+            </div>
+
+            <div style="font-size:14px; font-weight:bold; color:#555;">點擊香港實體硬幣按鈕付款：</div>
+            <div class="m2-coins-row">
+                <button class="coin-btn coin-10" onclick="m2AddCoin(10, ${targetAmount})">$10</button>
+                <button class="coin-btn coin-5" onclick="m2AddCoin(5, ${targetAmount})">$5</button>
+                <button class="coin-btn coin-2" onclick="m2AddCoin(2, ${targetAmount})">$2</button>
+                <button class="coin-btn coin-1" onclick="m2AddCoin(1, ${targetAmount})">$1</button>
+            </div>
+
+            <button style="background:#9e9e9e; color:white; padding:8px 16px; margin-top:5px; font-size:14px; border-radius:20px;" onclick="m2ResetCoins(${targetAmount})">🔄 清除金額重新投幣</button>
+            <div id="m2PayFeedback" class="status" style="margin-top:10px; font-size:16px; font-weight:bold;"></div>
+        `;
+    }
+
+    function m2AddCoin(amount, target) {
+        m2PaidAmount += amount;
+        document.getElementById('m2PaidText').innerText = "$" + m2PaidAmount;
+        speakCantonese(amount + "蚊");
+
+        var fb = document.getElementById('m2PayFeedback');
+        if (m2PaidAmount === target) {
+            fb.style.color = "#2e7d32";
+            fb.innerText = "🎉 付款成功！啱啱好 $" + target + " 蚊！";
+            speakCantonese("收你" + target + "蚊，啱啱好！多謝！");
+            setTimeout(function() {
+                m2Step++;
+                renderM2();
+            }, 2000);
+        } else if (m2PaidAmount > target) {
+            fb.style.color = "#d32f2f";
+            fb.innerText = "⚠️ 俾多咗錢啦 ($" + m2PaidAmount + " 蚊)，幫你重新投幣！";
+            speakCantonese("俾多咗錢啦，請重新投幣");
+            setTimeout(function() {
+                m2ResetCoins(target);
+            }, 1500);
+        }
+    }
+
+    function m2ResetCoins(target) {
+        m2PaidAmount = 0;
+        var el = document.getElementById('m2PaidText');
+        if (el) el.innerText = "$0";
+        var fb = document.getElementById('m2PayFeedback');
+        if (fb) fb.innerText = "";
+    }
+
+
+    /* =========================================================================
+       初始化
+    ========================================================================= */
+    window.onload = function() {
+        loadSavedQuestions();
+        initSpeechRecognition();
+        showMainMenu(); // 網頁載入時優先顯示主選單
+    };
+</script>
+
+</body>
+</html>
