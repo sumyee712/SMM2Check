@@ -92,7 +92,7 @@
             transform: scale(0.98);
         }
 
-        /* 模組一樣式保留 */
+        /* 模組一樣式 */
         .filter-container {
             display: flex;
             gap: 10px;
@@ -225,37 +225,39 @@
             border-radius: 12px;
             font-size: 15px;
             text-align: left;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             line-height: 1.4;
         }
-        .m2-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin: 15px 0;
-        }
-        .m2-item-btn {
-            background: #ffffff;
-            border: 2px solid #e0e0e0;
+
+        /* 照片熱區點擊地圖容器 */
+        .photo-map-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 10px;
             border-radius: 15px;
-            padding: 15px 5px;
-            font-size: 40px;
+            overflow: hidden;
+            border: 2px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .photo-map-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .hotspot {
+            position: absolute;
             cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
+            border: 2px dashed rgba(255,255,255,0.4);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
             transition: all 0.2s;
         }
-        .m2-item-btn span {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
-        .m2-item-btn:hover {
+        .hotspot:active {
+            background: rgba(76, 175, 80, 0.4);
             border-color: #4CAF50;
-            background-color: #f1f8e9;
         }
+
         /* 積木樣式 */
         .m2-sentence-box {
             min-height: 50px;
@@ -271,7 +273,7 @@
             font-size: 18px;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         .m2-blocks-grid {
             display: flex;
@@ -294,7 +296,8 @@
             transform: scale(0.95);
             background: #1976D2;
         }
-        /* 付款與硬幣樣式 */
+
+        /* 付款與高仿真港幣硬幣樣式 */
         .m2-vendor-say {
             background: #e8f5e9;
             color: #2e7d32;
@@ -302,50 +305,78 @@
             border-radius: 12px;
             font-size: 16px;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             border: 1px solid #c8e6c9;
         }
         .m2-pay-board {
             background: #fafafa;
             border: 1px solid #eee;
             border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 15px;
+            padding: 10px;
+            margin-bottom: 12px;
         }
         .m2-coins-row {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
             margin: 15px 0;
+            align-items: center;
         }
-        .coin-btn {
+        
+        /* 港幣硬幣真實視覺擬真 */
+        .hk-coin {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.25), inset 0 2px 4px rgba(255,255,255,0.8);
             transition: transform 0.1s;
+            user-select: none;
         }
-        .coin-btn:active { transform: scale(0.9); }
-        .coin-10 {
+        .hk-coin:active { transform: scale(0.92); }
+        
+        /* $10 雙色硬幣 */
+        .coin-hk10 {
             width: 68px; height: 68px;
-            background: radial-gradient(circle, #e0e0e0 48%, #ffd700 50%);
-            border: 3px solid #d4af37; color: #333; font-size: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #f3d068 0%, #d4af37 50%, #dcdcdc 53%, #b0b0b0 100%);
+            border: 2px solid #888;
+            color: #333;
+            font-size: 18px;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
         }
-        .coin-5 {
-            width: 65px; height: 65px;
-            background: #e0e0e0; border: 4px solid #b0b0b0; color: #222; font-size: 19px;
+        /* $5 厚銀幣 */
+        .coin-hk5 {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffffff 0%, #e0e0e0 70%, #999 100%);
+            border: 4px solid #b0b0b0;
+            color: #222;
+            font-size: 18px;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
         }
-        .coin-2 {
+        /* $2 10角波浪形硬幣 */
+        .coin-hk2 {
             width: 58px; height: 58px;
-            background: #e8e8e8; border: 3px dashed #999; color: #222; font-size: 17px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffffff 0%, #e8e8e8 70%, #aaa 100%);
+            border: 3px dashed #888;
+            color: #222;
+            font-size: 16px;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
         }
-        .coin-1 {
+        /* $1 標準銀幣 */
+        .coin-hk1 {
             width: 52px; height: 52px;
-            background: #f0f0f0; border: 3px solid #ccc; color: #222; font-size: 16px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffffff 0%, #f0f0f0 70%, #bbb 100%);
+            border: 2px solid #aaa;
+            color: #222;
+            font-size: 15px;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
         }
     </style>
 </head>
@@ -375,13 +406,13 @@
                 <span style="font-size: 32px;">🛒</span>
                 <div>
                     <div>模組二：社區街市買餸實戰</div>
-                    <div style="font-size: 12px; opacity: 0.85; font-weight: normal; margin-top: 3px;">街市尋詞、積木拼句、港幣找數</div>
+                    <div style="font-size: 12px; opacity: 0.85; font-weight: normal; margin-top: 3px;">煲番茄薯仔湯（真實相片尋詞、積木拼句、港幣付款）</div>
                 </div>
             </button>
         </div>
     </div>
 
-    <!-- ==================== 模組一：基礎尋詞練習 (舊有功能完整保留) ==================== -->
+    <!-- ==================== 模組一：基礎尋詞練習 ==================== -->
     <div id="module1View" style="display: none;">
         <div class="top-nav">
             <button class="btn-back-menu" onclick="showMainMenu()">🏠 返回主選單</button>
@@ -428,7 +459,7 @@
         <div class="status" id="statusText">狀態：準備就緒 (廣東話模式)</div>
     </div>
 
-    <!-- ==================== 模組二：社區街市買餸實戰 (全新IADL關卡) ==================== -->
+    <!-- ==================== 模組二：社區街市買餸實戰 (煲番茄薯仔湯) ==================== -->
     <div id="module2View" style="display: none;">
         <div class="top-nav">
             <button class="btn-back-menu" onclick="showMainMenu()">🏠 返回主選單</button>
@@ -436,7 +467,7 @@
         </div>
 
         <div id="module2Content">
-            <!-- 動態由 JavaScript 繪製關卡步驟內容 -->
+            <!-- 動態由 JavaScript 繪製關卡內容 -->
         </div>
     </div>
 
@@ -463,15 +494,16 @@
 </div>
 
 <script>
-    /* =========================================================================
-       通用 / 主選單 控制邏輯
-    ========================================================================= */
+    /* 街市真實相片資源 */
+    var marketImg1 = 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80'; // 菜檔相片1 (番茄)
+    var marketImg2 = 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80'; // 菜檔相片2 (薯仔)
+
+    /* 通用控制邏輯 */
     function showMainMenu() {
         document.getElementById('mainMenuView').style.display = 'block';
         document.getElementById('module1View').style.display = 'none';
         document.getElementById('module2View').style.display = 'none';
 
-        // 停止模組一的語音辨識與朗讀
         if (isListening && recognition) {
             try { recognition.stop(); } catch(e){}
         }
@@ -508,29 +540,19 @@
         }
     }
 
-
-    /* =========================================================================
-       模組一：原版核心邏輯 (完整無損保留)
-    ========================================================================= */
+    /* 模組一：原版核心邏輯 */
     var defaultQuestions = [
-        // 飲食水果 (food)
         { name: "蘋果", category: "food", level: 1, keywords: ["蘋果", "屏果", "平果", "苹果", "個蘋果", "一個蘋果"], emoji: "🍎", semantic: "一種紅色嘅水果，甜甜地嘅", phonemic: "第一個字係『ping4』（平）..." },
         { name: "香蕉", category: "food", level: 1, keywords: ["香蕉", "鄉蕉", "隻香蕉", "一隻香蕉"], emoji: "🍌", semantic: "黃色長條形嘅水果，剝皮食嘅", phonemic: "第一個字係『hoeng1』（香）..." },
         { name: "西瓜", category: "food", level: 1, keywords: ["西瓜", "綠色西瓜", "個西瓜"], emoji: "🍉", semantic: "夏天成日食、綠色皮紅色肉嘅大水果", phonemic: "第一個字係『sai1』（西）..." },
         { name: "珍珠奶茶", category: "food", level: 2, keywords: ["奶茶", "珍珠奶茶", "一杯奶茶"], emoji: "🧋", semantic: "台灣出名嘅飲品", phonemic: "第一個字係『naai5』（奶）..." },
-        
-        // 生活用品 (daily)
         { name: "牙刷", category: "daily", level: 1, keywords: ["牙刷", "芽刷", "雅刷", "牙刷仔", "一把牙刷", "一支牙刷"], emoji: "🪥", semantic: "每日屋企刷牙用嘅工具", phonemic: "第一個字係『ngaa4』（牙）..." },
         { name: "眼鏡", category: "daily", level: 1, keywords: ["眼鏡", "眼精", "眼鏡兒", "一副眼鏡", "戴眼鏡"], emoji: "👓", semantic: "令我地睇嘢清楚啲嘢", phonemic: "第一個字係『ngaan5』（眼）..." },
         { name: "手錶", category: "daily", level: 1, keywords: ["手錶", "手表", "隻手錶", "一隻手錶"], emoji: "⌚", semantic: "戴喺手腕睇時間嘅嘢", phonemic: "第一個字係『sau2』（手）..." },
         { name: "雨傘", category: "daily", level: 2, keywords: ["雨傘", "遮", "一把遮", "雨遮", "一把雨傘"], emoji: "☂️", semantic: "落雨嗰陣用嚟遮雨嘅工具", phonemic: "第一個字係『jyu5』（雨）..." },
-
-        // 交通工具 (transport)
         { name: "巴士", category: "transport", level: 1, keywords: ["巴士", "雙層巴士", "搭巴士", "公車"], emoji: "🚌", semantic: "馬路上載好多乘客嘅大型公共交通工具", phonemic: "第一個字係『baa1』（巴）..." },
         { name: "計程車", category: "transport", level: 1, keywords: ["的士", "啲士", "搭的士", "紅的"], emoji: "🚕", semantic: "招手即停、按錶收費嘅汽車", phonemic: "第一個字係『dik1』（的）..." },
         { name: "飛機", category: "transport", level: 2, keywords: ["飛機", "架飛機", "搭飛機"], emoji: "✈️", semantic: "喺天空飛、帶人去旅行嘅交通工具", phonemic: "第一個字係『fei1』（飛）..." },
-
-        // 身體部位 (body)
         { name: "眼睛", category: "body", level: 1, keywords: ["眼睛", "眼珠", "一雙眼睛", "隻眼"], emoji: "👁️", semantic: "面部用嚟睇嘢嘅器官", phonemic: "第一個字係『ngaan5』（眼）..." },
         { name: "耳朵", category: "body", level: 1, keywords: ["耳朵", "耳仔", "隻耳仔"], emoji: "👂", semantic: "頭部兩旁用嚟聽聲音嘅器官", phonemic: "第一個字係『ji5』（耳）..." },
         { name: "手掌", category: "body", level: 2, keywords: ["手掌", "隻手", "手板"], emoji: "✋", semantic: "用嚟拿嘢、握手嘅身體部位", phonemic: "第一個字係『sau2』（手）..." }
@@ -562,9 +584,7 @@
             return matchCat && matchDiff;
         });
 
-        if (activeQuestions.length === 0) {
-            activeQuestions = rawQuestions;
-        }
+        if (activeQuestions.length === 0) activeQuestions = rawQuestions;
         currentIndex = 0;
         loadQuestion();
     }
@@ -607,19 +627,12 @@
                 var height = img.height;
 
                 if (width > height) {
-                    if (width > max_size) {
-                        height *= max_size / width;
-                        width = max_size;
-                    }
+                    if (width > max_size) { height *= max_size / width; width = max_size; }
                 } else {
-                    if (height > max_size) {
-                        width *= max_size / height;
-                        height = max_size;
-                    }
+                    if (height > max_size) { width *= max_size / height; height = max_size; }
                 }
 
-                canvas.width = width;
-                canvas.height = height;
+                canvas.width = width; canvas.height = height;
                 var ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
@@ -636,14 +649,8 @@
         var nameInput = document.getElementById('customNameInput').value.trim();
         var semanticInput = document.getElementById('customSemanticInput').value.trim();
 
-        if (!fileInput.files || !fileInput.files[0]) {
-            alert("請選擇照片或即時拍攝照片！");
-            return;
-        }
-        if (!nameInput) {
-            alert("請輸入名稱！");
-            return;
-        }
+        if (!fileInput.files || !fileInput.files[0]) { alert("請選擇照片！"); return; }
+        if (!nameInput) { alert("請輸入名稱！"); return; }
 
         compressImage(fileInput.files[0], function(compressedBase64) {
             var newQuestion = {
@@ -712,13 +719,10 @@
             for (var i = event.resultIndex; i < event.results.length; i++) {
                 transcript += event.results[i][0].transcript;
             }
-            
             var cleanText = transcript.replace(/[.,!?。，！？\s]/g, '');
             document.getElementById('heardBox').innerText = "聽到的內容：「" + cleanText + "」";
 
-            if (!hasAnswered && cleanText.length > 0) {
-                checkAnswer(cleanText);
-            }
+            if (!hasAnswered && cleanText.length > 0) checkAnswer(cleanText);
         };
 
         recognition.onerror = function(event) {
@@ -741,24 +745,16 @@
     }
 
     function toggleListening() {
-        if (!recognition) {
-            alert("請使用 Chrome 或 Safari 瀏覽器開啟此網頁。");
-            return;
-        }
-
+        if (!recognition) { alert("請使用 Chrome 或 Safari 瀏覽器。"); return; }
         if (isListening) {
             try { recognition.stop(); } catch(e) {}
         } else {
             try {
-                recognition.lang = 'zh-HK';
-                recognition.start();
+                recognition.lang = 'zh-HK'; recognition.start();
             } catch (e) {
                 try {
                     recognition.stop();
-                    setTimeout(function() {
-                        recognition.lang = 'zh-HK';
-                        recognition.start();
-                    }, 200);
+                    setTimeout(function() { recognition.lang = 'zh-HK'; recognition.start(); }, 200);
                 } catch(err) {}
             }
         }
@@ -767,14 +763,8 @@
     function checkAnswer(userInput) {
         if (!userInput) return;
         var current = activeQuestions[currentIndex];
-
-        var isCorrect = current.keywords.some(function(key) {
-            return userInput.indexOf(key) !== -1;
-        });
-
-        if (isCorrect) {
-            handleSuccess("🎉 答對咗！好棒！");
-        }
+        var isCorrect = current.keywords.some(function(key) { return userInput.indexOf(key) !== -1; });
+        if (isCorrect) handleSuccess("🎉 答對咗！好棒！");
     }
 
     function manualPass() { handleSuccess("👍 家屬確認答對！太棒了！"); }
@@ -787,7 +777,6 @@
         var current = activeQuestions[currentIndex];
         document.getElementById('hintBox').innerText = msg;
         speakCantonese("答對咗，呢個係" + current.name);
-        
         setTimeout(function() { nextQuestion(); }, 2200);
     }
 
@@ -815,9 +804,9 @@
 
 
     /* =========================================================================
-       模組二：社區街市買餸實戰 (全新狀態機邏輯)
+       模組二：社區街市買餸實戰 (煲番茄薯仔湯 + 真相照片 + 港幣視覺硬幣)
     ========================================================================= */
-    var m2Step = 1; // 狀態：1=街市尋詞(番茄), 2=街市拼句, 3=街市付款, 4=超市尋詞(雞蛋), 5=超市拼句, 6=超市付款, 7=通關結算
+    var m2Step = 1; 
     var m2SelectedBlocks = [];
     var m2PaidAmount = 0;
 
@@ -826,83 +815,77 @@
         m2PaidAmount = 0;
         var container = document.getElementById('module2Content');
 
-        if (m2Step === 1) { // 關卡1-A: 街市菜檔尋詞
-            speakCantonese("今晚想煮番茄炒蛋，你要買兩個番茄同埋一排雞蛋。先喺菜檔揀兩個番茄。");
+        if (m2Step === 1) { // 關卡1-A: 街市菜檔尋詞 (真實相片點擊番茄)
+            speakCantonese("今晚想煲番茄薯仔湯，你要買兩個番茄同埋兩個薯仔。請喺第一間菜檔相片中，點擊揀出番茄。");
             container.innerHTML = `
-                <div class="m2-badge">第一關：街市菜檔 (1/3)</div>
-                <div class="m2-task-box">💡 <b>任務：</b>今晚想煮番茄炒蛋，你要買<b>兩個番茄</b>、<b>一排雞蛋</b>。</div>
-                <h3 style="margin:10px 0;">請喺菜檔點擊揀出「番茄」🍅</h3>
-                <div class="m2-grid">
-                    <button class="m2-item-btn" onclick="m2SelectSearchItem(true, '番茄')">
-                        🍅<span>番茄</span>
-                    </button>
-                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '西蘭花')">
-                        🥦<span>西蘭花</span>
-                    </button>
-                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '薯仔')">
-                        🥔<span>薯仔</span>
-                    </button>
-                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '白菜')">
-                        🥬<span>白菜</span>
-                    </button>
+                <div class="m2-badge">第一關：街市菜檔1 (1/3)</div>
+                <div class="m2-task-box">🍲 <b>任務：</b>今晚想煲<b>番茄薯仔湯</b>，你需要買<b>兩個番茄</b>同埋<b>兩個薯仔</b>。</div>
+                <h3 style="margin:8px 0;">請點擊相片中的「番茄」🍅</h3>
+                
+                <div class="photo-map-container">
+                    <img src="${marketImg1}" class="photo-map-img" alt="街市菜檔1">
+                    <!-- 番茄熱區 (左上方堆疊處) -->
+                    <div class="hotspot" style="top: 10%; left: 15%; width: 35%; height: 35%;" onclick="m2SelectSearchItem(true, '番茄')"></div>
+                    <!-- 其他干擾熱區 -->
+                    <div class="hotspot" style="top: 35%; left: 32%; width: 30%; height: 50%;" onclick="m2SelectSearchItem(false, '蘆筍')"></div>
+                    <div class="hotspot" style="top: 50%; left: 62%; width: 35%; height: 40%;" onclick="m2SelectSearchItem(false, '紅蘿蔔')"></div>
+                    <div class="hotspot" style="top: 0%; left: 52%; width: 45%; height: 30%;" onclick="m2SelectSearchItem(false, '小紅蘿蔔')"></div>
                 </div>
-                <div id="m2Feedback" class="hint-box">請點擊上方圖片選擇物品</div>
+
+                <div id="m2Feedback" class="hint-box">請直接點擊相片中的「番茄」</div>
             `;
         } 
-        else if (m2Step === 2) { // 關卡1-B: 街市積木拼句
-            speakCantonese("請點擊積木，拼出我要兩個番茄。");
+        else if (m2Step === 2) { // 關卡1-B: 街市積木拼句 (隱藏直接提示 + 新增提示按鈕)
+            speakCantonese("請跟伙記講你想買咩。");
             var blocks = ['唔該', '兩', '個', '一', '斤', '棵', '薯仔', '三', '我要', '番茄'];
             var validAnswers = ['我要兩個番茄', '唔該我要兩個番茄', '我要兩個番茄唔該'];
-            renderSentenceStep("第一關：街市菜檔 (2/3)", blocks, validAnswers, "我要兩個番茄");
+            renderSentenceStep("第一關：街市菜檔1 (2/3)", blocks, validAnswers, "我要兩個番茄");
         } 
         else if (m2Step === 3) { // 關卡1-C: 街市港幣付款
             speakCantonese("番茄，好！秤咗呢度12蚊。");
-            renderPaymentStep("第一關：街市菜檔 (3/3)", 12, "番茄，好！秤咗呢度$12蚊。");
+            renderPaymentStep("第一關：街市菜檔1 (3/3)", 12, "番茄，好！秤咗呢度$12蚊。");
         } 
-        else if (m2Step === 4) { // 關卡2-A: 超市尋詞
-            speakCantonese("然後再去超市，揀出雞蛋。");
+        else if (m2Step === 4) { // 關卡2-A: 街市菜檔2尋詞 (真實相片點擊薯仔)
+            speakCantonese("接著嚟到第二間菜檔，請喺相片中點擊揀出薯仔。");
             container.innerHTML = `
-                <div class="m2-badge">第二關：超級市場 (1/3)</div>
-                <div class="m2-task-box">💡 <b>任務：</b>依家嚟到超市，要買<b>一排雞蛋</b>。</div>
-                <h3 style="margin:10px 0;">請喺貨架點擊揀出「雞蛋」🥚</h3>
-                <div class="m2-grid">
-                    <button class="m2-item-btn" onclick="m2SelectSearchItem(true, '雞蛋')">
-                        🥚<span>雞蛋</span>
-                    </button>
-                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '牛奶')">
-                        🥛<span>牛奶</span>
-                    </button>
-                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '麵包')">
-                        🍞<span>麵包</span>
-                    </button>
-                    <button class="m2-item-btn" onclick="m2SelectSearchItem(false, '果汁')">
-                        🧃<span>果汁</span>
-                    </button>
+                <div class="m2-badge">第二關：街市菜檔2 (1/3)</div>
+                <div class="m2-task-box">🍲 <b>任務：</b>買完番茄，依家要喺第二間菜檔買<b>兩個薯仔</b>。</div>
+                <h3 style="margin:8px 0;">請點擊相片中的「薯仔」🥔</h3>
+                
+                <div class="photo-map-container">
+                    <img src="${marketImg2}" class="photo-map-img" alt="街市菜檔2">
+                    <!-- 薯仔熱區 (藍色籃子) -->
+                    <div class="hotspot" style="top: 52%; left: 12%; width: 38%; height: 32%;" onclick="m2SelectSearchItem(true, '薯仔')"></div>
+                    <!-- 其他干擾熱區 -->
+                    <div class="hotspot" style="top: 60%; left: 52%; width: 35%; height: 30%;" onclick="m2SelectSearchItem(false, '番茄')"></div>
+                    <div class="hotspot" style="top: 15%; left: 0%; width: 45%; height: 40%;" onclick="m2SelectSearchItem(false, '白菜')"></div>
+                    <div class="hotspot" style="top: 80%; left: 45%; width: 30%; height: 20%;" onclick="m2SelectSearchItem(false, '青瓜')"></div>
                 </div>
-                <div id="m2Feedback" class="hint-box">請點擊上方圖片選擇物品</div>
+
+                <div id="m2Feedback" class="hint-box">請直接點擊相片中的「薯仔」</div>
             `;
         } 
-        else if (m2Step === 5) { // 關卡2-B: 超市積木拼句
-            speakCantonese("請點擊積木，拼出我要一排雞蛋。");
-            var blocks = ['唔該', '兩', '個', '一', '斤', '棵', '排', '三', '我要', '雞蛋'];
-            var validAnswers = ['我要一排雞蛋', '唔該我要一排雞蛋', '我要一排雞蛋唔該'];
-            renderSentenceStep("第二關：超級市場 (2/3)", blocks, validAnswers, "我要一排雞蛋");
+        else if (m2Step === 5) { // 關卡2-B: 街市積木拼句 (薯仔)
+            speakCantonese("請跟伙記講你想買咩。");
+            var blocks = ['唔該', '兩', '個', '一', '斤', '棵', '排', '三', '我要', '薯仔'];
+            var validAnswers = ['我要兩個薯仔', '唔該我要兩個薯仔', '我要兩個薯仔唔該'];
+            renderSentenceStep("第二關：街市菜檔2 (2/3)", blocks, validAnswers, "我要兩個薯仔");
         } 
-        else if (m2Step === 6) { // 關卡2-C: 超市港幣付款
-            speakCantonese("一排雞蛋呢度17蚊。");
-            renderPaymentStep("第二關：超級市場 (3/3)", 17, "一排雞蛋呢度$17蚊。");
+        else if (m2Step === 6) { // 關卡2-C: 街市港幣付款 ($15)
+            speakCantonese("兩個薯仔呢度15蚊。");
+            renderPaymentStep("第二關：街市菜檔2 (3/3)", 15, "兩個薯仔，秤咗呢度$15蚊。");
         } 
         else if (m2Step === 7) { // 通關結算畫面
-            speakCantonese("恭喜你！成功完成買餸任務！太棒了！");
+            speakCantonese("恭喜你！成功買齊材料！今晚有美味嘅番茄薯仔湯飲啦！");
             container.innerHTML = `
-                <div style="font-size: 60px; margin: 10px 0;">🎉</div>
-                <h2 style="color: #4CAF50; margin-top:0;">恭喜通關！買餸成功！</h2>
+                <div style="font-size: 60px; margin: 10px 0;">🥣</div>
+                <h2 style="color: #4CAF50; margin-top:0;">恭喜通關！煲湯成功！</h2>
                 <div class="m2-task-box" style="text-align: left; background:#eef7ff; border-color:#bbdefb; color:#1565c0;">
-                    <b>🛒 今日戰利品結算：</b><br>
+                    <b>🍲 番茄薯仔湯 材料結算：</b><br>
                     • 番茄 2個：<b>$12</b><br>
-                    • 雞蛋 1排：<b>$17</b><br>
+                    • 薯仔 2個：<b>$15</b><br>
                     -----------------------------<br>
-                    <b>💰 總共付款：$29 港幣</b>
+                    <b>💰 總共付款：$27 港幣</b>
                 </div>
                 <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
                     <button class="btn-primary" onclick="startModule2()">🔄 再玩一次買餸實戰</button>
@@ -912,7 +895,7 @@
         }
     }
 
-    // 尋詞點擊反應
+    /* 尋詞點擊反應 */
     function m2SelectSearchItem(isCorrect, name) {
         var fb = document.getElementById('m2Feedback');
         if (isCorrect) {
@@ -925,13 +908,13 @@
             }, 1600);
         } else {
             fb.style.color = "#d32f2f";
-            fb.innerText = "❌ 呢個係「" + name + "」，再試下啦！";
+            fb.innerText = "❌ 呢個係「" + name + "」，再點擊下啦！";
             speakCantonese("呢個係" + name + "，再試下啦");
         }
     }
 
-    // 渲染積木拼句步驟
-    function renderSentenceStep(stepTitle, blocks, validAnswers, targetPrompt) {
+    /* 渲染積木拼句步驟 (優化語境 + 提示按鈕) */
+    function renderSentenceStep(stepTitle, blocks, validAnswers, hintText) {
         var container = document.getElementById('module2Content');
         
         var blocksHtml = blocks.map(function(b) {
@@ -940,8 +923,7 @@
 
         container.innerHTML = `
             <div class="m2-badge">${stepTitle}</div>
-            <h3 style="margin:5px 0 10px;">請依序點選積木：「${targetPrompt}」</h3>
-            <div style="font-size:12px; color:#666; margin-bottom:10px;">（提示：「唔該」可放在最前或最後）</div>
+            <h3 style="margin:5px 0 10px;">🗣️ 請跟伙記講你想買咩：</h3>
             
             <div class="m2-sentence-box" id="m2SentenceBox">請點擊下方積木...</div>
 
@@ -949,12 +931,20 @@
                 ${blocksHtml}
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button style="background:#ff9800; color:white; flex:1;" onclick="m2ClearBlocks()">🗑️ 重設</button>
-                <button style="background:#4CAF50; color:white; flex:2;" onclick="m2CheckSentence(${JSON.stringify(validAnswers).replace(/"/g, '&quot;')})">✅ 確認答案</button>
+            <div style="display: flex; gap: 8px; margin-top: 15px;">
+                <button style="background:#2196F3; color:white; flex:1; font-size:14px; padding:10px;" onclick="m2ShowHint('${hintText}')">💡 提示</button>
+                <button style="background:#ff9800; color:white; flex:1; font-size:14px; padding:10px;" onclick="m2ClearBlocks()">🗑️ 重設</button>
+                <button style="background:#4CAF50; color:white; flex:1.5; font-size:14px; padding:10px;" onclick="m2CheckSentence(${JSON.stringify(validAnswers).replace(/"/g, '&quot;')})">✅ 確認</button>
             </div>
             <div id="m2SentenceFeedback" class="status" style="margin-top:10px; font-size:15px; font-weight:bold;"></div>
         `;
+    }
+
+    function m2ShowHint(hintText) {
+        var fb = document.getElementById('m2SentenceFeedback');
+        fb.style.color = "#0056b3";
+        fb.innerText = "💡 提示：你可以講「" + hintText + "」";
+        speakCantonese("你可以講：" + hintText);
     }
 
     function m2AddBlock(word) {
@@ -977,7 +967,7 @@
         
         if (validAnswers.indexOf(result) !== -1) {
             fb.style.color = "#2e7d32";
-            fb.innerText = "🎉 太棒了！拼句完全正確！";
+            fb.innerText = "🎉 太棒了！講得好清楚！";
             speakCantonese(m2SelectedBlocks.join('') + "。講得好棒！");
             setTimeout(function() {
                 m2Step++;
@@ -990,7 +980,7 @@
         }
     }
 
-    // 渲染港幣付款步驟
+    /* 渲染港幣付款步驟 (擬真港幣硬幣) */
     function renderPaymentStep(stepTitle, targetAmount, vendorSpeech) {
         var container = document.getElementById('module2Content');
 
@@ -1000,15 +990,16 @@
 
             <div class="m2-pay-board">
                 <div>目標金額：<span style="color:#d32f2f; font-size:24px; font-weight:bold;">$${targetAmount}</span></div>
-                <div style="margin-top:5px;">目前已投：<span id="m2PaidText" style="color:#2e7d32; font-size:24px; font-weight:bold;">$0</span></div>
+                <div style="margin-top:5px;">目前已付：<span id="m2PaidText" style="color:#2e7d32; font-size:24px; font-weight:bold;">$0</span></div>
             </div>
 
-            <div style="font-size:14px; font-weight:bold; color:#555;">點擊香港實體硬幣按鈕付款：</div>
+            <div style="font-size:14px; font-weight:bold; color:#555;">點擊港幣硬幣進行付款：</div>
+            
             <div class="m2-coins-row">
-                <button class="coin-btn coin-10" onclick="m2AddCoin(10, ${targetAmount})">$10</button>
-                <button class="coin-btn coin-5" onclick="m2AddCoin(5, ${targetAmount})">$5</button>
-                <button class="coin-btn coin-2" onclick="m2AddCoin(2, ${targetAmount})">$2</button>
-                <button class="coin-btn coin-1" onclick="m2AddCoin(1, ${targetAmount})">$1</button>
+                <div class="hk-coin coin-hk10" onclick="m2AddCoin(10, ${targetAmount})">$10</div>
+                <div class="hk-coin coin-hk5" onclick="m2AddCoin(5, ${targetAmount})">$5</div>
+                <div class="hk-coin coin-hk2" onclick="m2AddCoin(2, ${targetAmount})">$2</div>
+                <div class="hk-coin coin-hk1" onclick="m2AddCoin(1, ${targetAmount})">$1</div>
             </div>
 
             <button style="background:#9e9e9e; color:white; padding:8px 16px; margin-top:5px; font-size:14px; border-radius:20px;" onclick="m2ResetCoins(${targetAmount})">🔄 清除金額重新投幣</button>
@@ -1049,13 +1040,11 @@
     }
 
 
-    /* =========================================================================
-       初始化
-    ========================================================================= */
+    /* 初始化 */
     window.onload = function() {
         loadSavedQuestions();
         initSpeechRecognition();
-        showMainMenu(); // 網頁載入時優先顯示主選單
+        showMainMenu();
     };
 </script>
 
