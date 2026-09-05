@@ -409,6 +409,8 @@
                     <div style="font-size: 12px; opacity: 0.85; font-weight: normal; margin-top: 3px;">煲番茄薯仔湯（真實相片尋詞、積木拼句、港幣付款）</div>
                 </div>
             </button>
+
+            <button class="btn-back-menu" style="background-color: #009688;" onclick="openStatsModal()">📊 臨床紀錄</button>
         </div>
     </div>
 
@@ -494,6 +496,71 @@
 </div>
 
 <script>
+    /* ==================== 臨床數據追蹤系統 ==================== */
+var clinicalData = {
+    totalAttempted: 0,
+    correctCount: 0,
+    hintCount: 0,
+    totalReactionTimeSec: 0,
+    questionStartTime: null
+};
+
+// 開始計時
+function startClinicalTimer() {
+    clinicalData.questionStartTime = Date.now();
+}
+
+// 紀錄 Cueing (提示次數)
+function recordCueing() {
+    clinicalData.hintCount++;
+}
+
+// 紀錄答對/完成
+function recordSuccess() {
+    clinicalData.totalAttempted++;
+    clinicalData.correctCount++;
+    
+    if (clinicalData.questionStartTime) {
+        var elapsed = (Date.now() - clinicalData.questionStartTime) / 1000;
+        clinicalData.totalReactionTimeSec += elapsed;
+        clinicalData.questionStartTime = null; // 避免重複累計
+    }
+}
+
+// 開啟並更新數據視窗
+function openStatsModal() {
+    var accuracy = clinicalData.totalAttempted > 0 
+        ? Math.round((clinicalData.correctCount / clinicalData.totalAttempted) * 100) 
+        : 0;
+        
+    var avgTime = clinicalData.correctCount > 0 
+        ? (clinicalData.totalReactionTimeSec / clinicalData.correctCount).toFixed(1) 
+        : 0;
+
+    document.getElementById('statTotal').innerText = clinicalData.totalAttempted;
+    document.getElementById('statAccuracy').innerText = accuracy + "%";
+    document.getElementById('statAvgTime').innerText = avgTime;
+    document.getElementById('statHints').innerText = clinicalData.hintCount;
+
+    document.getElementById('statsModal').style.display = 'flex';
+}
+
+function closeStatsModal() {
+    document.getElementById('statsModal').style.display = 'none';
+}
+
+function resetStats() {
+    if (confirm("確定要重設本次練習的臨床數據嗎？")) {
+        clinicalData = {
+            totalAttempted: 0,
+            correctCount: 0,
+            hintCount: 0,
+            totalReactionTimeSec: 0,
+            questionStartTime: null
+        };
+        openStatsModal();
+    }
+}
     /* 街市真實相片資源 */
 var marketImg1 = 'market1.jpg';
 var marketImg2 = 'market2.jpg';
@@ -586,7 +653,7 @@ var marketImg2 = 'market2.jpg';
 
         if (activeQuestions.length === 0) activeQuestions = rawQuestions;
         currentIndex = 0;
-        loadQuestion();
+        loadQuestion();startClinicalTimer();
     }
 
     function loadQuestion() {
@@ -783,12 +850,14 @@ function saveCustomQuestion() {
         var current = activeQuestions[currentIndex];
         var isCorrect = current.keywords.some(function(key) { return userInput.indexOf(key) !== -1; });
         if (isCorrect) handleSuccess("🎉 答對咗！好棒！");
+        recordSuccess();
     }
 
     function manualPass() { handleSuccess("👍 家屬確認答對！太棒了！"); }
 
     function handleSuccess(msg) {
         if (hasAnswered) return;
+        recordSuccess();
         hasAnswered = true;
         try { recognition.stop(); } catch(e) {}
 
@@ -811,13 +880,14 @@ function saveCustomQuestion() {
         } else {
             document.getElementById('hintBox').innerText = "答案係：" + current.name;
             speakCantonese("呢個就係" + current.name);
+        recordCueing();
         }
     }
 
     function nextQuestion() {
         if (activeQuestions.length === 0) return;
         currentIndex = (currentIndex + 1) % activeQuestions.length;
-        loadQuestion();
+        loadQuestion();startClinicalTimer();
     }
 
 
@@ -911,12 +981,15 @@ function saveCustomQuestion() {
                 </div>
             `;
         }
+        if (m2Step < 7) {
+        startClinicalTimer();
     }
 
     /* 尋詞點擊反應 */
     function m2SelectSearchItem(isCorrect, name) {
         var fb = document.getElementById('m2Feedback');
         if (isCorrect) {
+            recordSuccess();
             fb.style.color = "#2e7d32";
             fb.innerText = "🎉 答對咗！搵到「" + name + "」啦！";
             speakCantonese("答對咗！搵到" + name + "啦！");
@@ -963,6 +1036,7 @@ function saveCustomQuestion() {
         fb.style.color = "#0056b3";
         fb.innerText = "💡 提示：你可以講「" + hintText + "」";
         speakCantonese("你可以講：" + hintText);
+        recordCueing();
     }
 
     function m2AddBlock(word) {
@@ -991,6 +1065,7 @@ function saveCustomQuestion() {
                 m2Step++;
                 renderM2();
             }, 1800);
+            recordSuccess();
         } else {
             fb.style.color = "#d32f2f";
             fb.innerText = "未啱喎，請重新試下拼句。";
@@ -1039,6 +1114,7 @@ function saveCustomQuestion() {
                 m2Step++;
                 renderM2();
             }, 2000);
+            recordSuccess();
         } else if (m2PaidAmount > target) {
             fb.style.color = "#d32f2f";
             fb.innerText = "⚠️ 俾多咗錢啦 ($" + m2PaidAmount + " 蚊)，幫你重新投幣！";
@@ -1064,6 +1140,24 @@ function saveCustomQuestion() {
         initSpeechRecognition();
         showMainMenu();
     };
+    <!-- 臨床數據統計彈出視窗 -->
+<div class="modal" id="statsModal">
+    <div class="modal-content" style="max-width: 400px;">
+        <h3 style="margin-top:0; color: #2c3e50; text-align: center;">📊 臨床練習數據記錄</h3>
+        
+        <div style="background: #f8f9fa; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 15px;">
+            <p style="margin: 6px 0;">🎯 <b>練習總題數：</b><span id="statTotal">0</span> 題</p>
+            <p style="margin: 6px 0;">✅ <b>整體正確率：</b><span id="statAccuracy" style="color: #2e7d32; font-weight: bold;">0%</span></p>
+            <p style="margin: 6px 0;">⏱️ <b>平均反應時間：</b><span id="statAvgTime" style="color: #0056b3; font-weight: bold;">0</span> 秒/題</p>
+            <p style="margin: 6px 0;">💡 <b>Cueing（提示）總次數：</b><span id="statHints" style="color: #d32f2f; font-weight: bold;">0</span> 次</p>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <button style="background-color: #f44336; color: white; flex: 1; font-size: 13px; padding: 8px;" onclick="resetStats()">🗑️ 重設數據</button>
+            <button style="background-color: #607D8B; color: white; flex: 1; font-size: 13px; padding: 8px;" onclick="closeStatsModal()">關閉</button>
+        </div>
+    </div>
+</div>
 </script>
 
 </body>
