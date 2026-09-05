@@ -196,8 +196,10 @@
             width: 85%;
             max-width: 350px;
             text-align: left;
+            max-height: 85vh;
+            overflow-y: auto;
         }
-        .modal-content input {
+        .modal-content input[type="text"] {
             width: 100%;
             padding: 8px;
             margin: 6px 0 12px;
@@ -456,6 +458,29 @@
             border-color: #FF9800;
             background-color: #fff8e1;
         }
+
+        /* OT Quick-Tags 臨床標籤組 */
+        .ot-tag-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 12px;
+        }
+        .ot-tag-item {
+            font-size: 12px;
+            background: #eef2f5;
+            border: 1px solid #cfd8dc;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .ot-tag-item input {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -488,7 +513,7 @@
                 </div>
             </button>
 
-            <button class="btn-back-menu" style="background-color: #009688; width: 100%; margin-top: 10px; padding: 12px;" onclick="openStatsModal()">📊 臨床紀錄</button>
+            <button class="btn-back-menu" style="background-color: #009688; width: 100%; margin-top: 10px; padding: 12px;" onclick="openStatsModal()">📊 臨床紀錄與 SOAP 生成</button>
         </div>
     </div>
 
@@ -573,16 +598,48 @@
     </div>
 </div>
 
-<!-- 臨床數據統計彈出視窗 -->
+<!-- 臨床數據統計與 SOAP 病歷自動生成彈出視窗 -->
 <div class="modal" id="statsModal">
-    <div class="modal-content" style="max-width: 400px;">
-        <h3 style="margin-top:0; color: #2c3e50; text-align: center;">📊 臨床練習數據記錄</h3>
+    <div class="modal-content" style="max-width: 420px;">
+        <h3 style="margin-top:0; color: #2c3e50; text-align: center;">📊 臨床紀錄與 SOAP 生成器</h3>
         
-        <div style="background: #f8f9fa; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 15px;">
-            <p style="margin: 6px 0;">🎯 <b>練習總題數：</b><span id="statTotal">0</span> 題</p>
-            <p style="margin: 6px 0;">✅ <b>整體正確率：</b><span id="statAccuracy" style="color: #2e7d32; font-weight: bold;">0%</span></p>
-            <p style="margin: 6px 0;">⏱️ <b>平均反應時間：</b><span id="statAvgTime" style="color: #0056b3; font-weight: bold;">0</span> 秒/題</p>
-            <p style="margin: 6px 0;">💡 <b>Cueing（提示）總次數：</b><span id="statHints" style="color: #d32f2f; font-weight: bold;">0</span> 次</p>
+        <!-- 客觀量化數據 -->
+        <div style="background: #f8f9fa; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; font-size: 14px;">
+            <p style="margin: 4px 0;">🎯 <b>練習總題數：</b><span id="statTotal">0</span> 題</p>
+            <p style="margin: 4px 0;">✅ <b>整體正確率：</b><span id="statAccuracy" style="color: #2e7d32; font-weight: bold;">0%</span></p>
+            <p style="margin: 4px 0;">⏱️ <b>平均反應時間：</b><span id="statAvgTime" style="color: #0056b3; font-weight: bold;">0</span> 秒/題</p>
+            <p style="margin: 4px 0;">💡 <b>Cueing (提示) 次數：</b><span id="statHints" style="color: #d32f2f; font-weight: bold;">0</span> 次</p>
+        </div>
+
+        <!-- 獨立程度評估 -->
+        <div style="margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: bold; color: #333;">獨立程度 (Level of Independence):</label>
+            <select id="indepLevel" style="width:100%; margin-top:4px; padding:6px; font-size:13px;" onchange="generateSoapNote()">
+                <option value="Independent (獨立完成)">Independent (獨立)</option>
+                <option value="Supervision (需現場監督)">Supervision (監督)</option>
+                <option value="Minimal Assist (輕度協助 <25%)" selected>Minimal Assist (輕度協助)</option>
+                <option value="Moderate Assist (中度協助 25-50%)">Moderate Assist (中度協助)</option>
+            </select>
+        </div>
+
+        <!-- OT 臨床觀察 Quick-Tags -->
+        <div style="margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: bold; color: #333;">臨床觀察 Quick-Tags (勾選自動加入病歷):</label>
+            <div class="ot-tag-grid">
+                <label class="ot-tag-item"><input type="checkbox" class="ot-tag" value="衝動按壓 Impulsivity" onchange="generateSoapNote()">衝動按壓</label>
+                <label class="ot-tag-item"><input type="checkbox" class="ot-tag" value="工作記憶衰退 WM Decay" onchange="generateSoapNote()">工作記憶衰退</label>
+                <label class="ot-tag-item"><input type="checkbox" class="ot-tag" value="左側忽略 Left Neglect" onchange="generateSoapNote()">左側忽略</label>
+                <label class="ot-tag-item"><input type="checkbox" class="ot-tag" value="搜尋遲緩 Scanning Delay" onchange="generateSoapNote()">搜尋遲緩</label>
+                <label class="ot-tag-item"><input type="checkbox" class="ot-tag" value="理解困難 Comprehension Deficit" onchange="generateSoapNote()">理解困難</label>
+                <label class="ot-tag-item"><input type="checkbox" class="ot-tag" value="低動機 Low Motivation" onchange="generateSoapNote()">低動機</label>
+            </div>
+        </div>
+
+        <!-- 自動生成的 SOAP 病歷草稿區域 -->
+        <div style="margin-bottom: 12px;">
+            <label style="font-size: 13px; font-weight: bold; color: #0056b3;">📝 自動生成 SOAP Note 草稿 (Objective/Assessment):</label>
+            <textarea id="soapNoteText" style="width: 100%; height: 110px; margin-top: 4px; font-size: 12px; font-family: monospace; padding: 6px; box-sizing: border-box; border: 1px solid #0056b3; border-radius: 6px; background: #f0f7ff;" readonly></textarea>
+            <button style="background-color: #008CBA; color: white; width: 100%; font-size: 12px; padding: 6px; margin-top: 4px; border-radius: 6px;" onclick="copySoapText()">📋 一鍵複製病歷草稿</button>
         </div>
 
         <div style="display: flex; gap: 8px;">
@@ -621,6 +678,47 @@ function recordSuccess() {
     }
 }
 
+function generateSoapNote() {
+    var accuracy = clinicalData.totalAttempted > 0 
+        ? Math.round((clinicalData.correctCount / clinicalData.totalAttempted) * 100) 
+        : 0;
+        
+    var avgTime = clinicalData.correctCount > 0 
+        ? (clinicalData.totalReactionTimeSec / clinicalData.correctCount).toFixed(1) 
+        : 0;
+
+    var indep = document.getElementById('indepLevel') ? document.getElementById('indepLevel').value : "Minimal Assist";
+
+    var selectedTags = [];
+    var tagElements = document.querySelectorAll('.ot-tag:checked');
+    tagElements.forEach(function(el) { selectedTags.push(el.value); });
+    var tagsStr = selectedTags.length > 0 ? selectedTags.join(', ') : 'None noted';
+
+    var soapText = 
+`[SOAP Note Draft - SpeakMyMind]
+O (Objective):
+• Task completed: Naming & IADL Grocery Training
+• Total trials: ${clinicalData.totalAttempted} | Accuracy: ${accuracy}%
+• Avg reaction time: ${avgTime}s / trial
+• Total cues required: ${clinicalData.hintCount}
+• Independence level: ${indep}
+
+A (Assessment / Clinical Observations):
+• Observed signs: ${tagsStr}
+• Patient demonstrated performance in simulated community task under ${indep.toLowerCase()}.`;
+
+    var area = document.getElementById('soapNoteText');
+    if (area) area.value = soapText;
+}
+
+function copySoapText() {
+    var copyText = document.getElementById("soapNoteText");
+    if (!copyText) return;
+    copyText.select();
+    navigator.clipboard.writeText(copyText.value);
+    alert("已複製病歷草稿至剪貼簿！");
+}
+
 function openStatsModal() {
     var accuracy = clinicalData.totalAttempted > 0 
         ? Math.round((clinicalData.correctCount / clinicalData.totalAttempted) * 100) 
@@ -634,6 +732,8 @@ function openStatsModal() {
     document.getElementById('statAccuracy').innerText = accuracy + "%";
     document.getElementById('statAvgTime').innerText = avgTime;
     document.getElementById('statHints').innerText = clinicalData.hintCount;
+
+    generateSoapNote();
 
     document.getElementById('statsModal').style.display = 'flex';
 }
